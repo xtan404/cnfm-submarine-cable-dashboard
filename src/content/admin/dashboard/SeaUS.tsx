@@ -233,7 +233,10 @@ function SeaUS() {
       {/* Polyline Path */}
       <Polyline
         positions={positions}
-        pathOptions={{ color: 'green', weight: 4 }}
+        pathOptions={{
+          color: stats.avgUtilization > 0 ? 'green' : 'red',
+          weight: 4
+        }}
         eventHandlers={{
           click: handleOpen // Open modal on click
         }}

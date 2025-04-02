@@ -230,7 +230,10 @@ function SJC() {
     <>
       <Polyline
         positions={positions}
-        pathOptions={{ color: 'blue', weight: 4 }}
+        pathOptions={{
+          color: stats.avgUtilization > 0 ? 'blue' : 'red',
+          weight: 4
+        }}
         eventHandlers={{
           click: handleOpen // Open modal on click
         }}
@@ -238,7 +241,10 @@ function SJC() {
       {/* Hong Kong to Nasugbu Route (Intersecting West Philippine Sea) */}
       <Polyline
         positions={hongKongToNasugbu}
-        pathOptions={{ color: 'blue', weight: 4 }}
+        pathOptions={{
+          color: stats.avgUtilization > 0 ? 'blue' : 'red',
+          weight: 4
+        }}
         eventHandlers={{
           click: handleOpen // Open modal on click
         }}

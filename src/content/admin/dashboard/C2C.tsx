@@ -232,7 +232,10 @@ function C2C() {
       {/* Clickable Polyline */}
       <Polyline
         positions={positions}
-        pathOptions={{ color: 'orange', weight: 4 }}
+        pathOptions={{
+          color: stats.avgUtilization > 0 ? 'orange' : 'red',
+          weight: 4
+        }}
         eventHandlers={{
           click: handleOpen // Open modal on click
         }}
@@ -240,9 +243,9 @@ function C2C() {
       {/* Hong Kong to Nasugbu Route (Intersecting West Philippine Sea) */}
       <Polyline
         positions={hongKongToNasugbu}
-        pathOptions={{ color: 'orange', weight: 4 }}
-        eventHandlers={{
-          click: handleOpen // Open modal on click
+        pathOptions={{
+          color: stats.avgUtilization > 0 ? 'orange' : 'red',
+          weight: 4
         }}
       />
       <DynamicMarker

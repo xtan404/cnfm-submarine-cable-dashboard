@@ -140,7 +140,10 @@ const C2CSingapore: React.FC = () => {
       axisBorder: { show: false },
       axisTicks: { show: false }
     },
-    yaxis: { title: { text: 'Utilization (%)' } },
+    yaxis: {
+      title: { text: 'Utilization (%)' },
+      max: 100 // Always set the max to 100%
+    },
     tooltip: {
       custom: ({ series, seriesIndex, dataPointIndex }) => {
         if (!stats.data || dataPointIndex >= stats.data.length) return null;

@@ -77,6 +77,12 @@ function AdminDashboard() {
   const theme = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mapHeight, setMapHeight] = useState('600px');
+  const [stats, setStats] = useState({
+    data: [],
+    totalGbps: 0,
+    avgUtilization: 0,
+    zeroUtilizationCount: 0
+  });
 
   // Function to update height dynamically
   const updateMapHeight = () => {
@@ -98,7 +104,7 @@ function AdminDashboard() {
     return () => window.removeEventListener('resize', updateMapHeight);
   }, []);
 
-  /*const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
 
     if (file) {
@@ -118,7 +124,7 @@ function AdminDashboard() {
           console.log('Parsed CSV Data:', result.data);
 
           // Send to backend
-          fetch('http://localhost:8081/upload-utilization', {
+          fetch('http://192.168.254.225:8081/upload-utilization', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -147,7 +153,52 @@ function AdminDashboard() {
         header: true // Treat the first row as column names
       });
     }
-  };*/
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          'http://192.168.254.225:8081/data-summary'
+        );
+        const result = await response.json();
+
+        if (Array.isArray(result)) {
+          const totalGbps = result.reduce(
+            (sum, item) => sum + (item.gbps || 0),
+            0
+          );
+
+          const totalUtilization = result.reduce(
+            (sum, item) => sum + (item.percent || 0),
+            0
+          );
+
+          const avgUtilization =
+            result.length > 0
+              ? parseFloat((totalUtilization / result.length).toFixed(2))
+              : 0;
+
+          const zeroCount = result.filter((item) => item.percent === 0).length;
+
+          // ✅ Set all state values in a single update
+          setStats((prev) => ({
+            ...prev,
+            data: result,
+            totalGbps,
+            avgUtilization,
+            zeroUtilizationCount: zeroCount
+          }));
+        } else {
+          console.error('Unexpected API response format:', result);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchData();
+  }, []); // ✅ Runs only once on mount
 
   const handleUploadClick = () => {
     fileInputRef.current?.click(); // Triggers file selection
@@ -179,9 +230,6 @@ function AdminDashboard() {
                 <Grid item xs={12}>
                   <Box p={4}>
                     <Header />
-                    <Typography sx={{ pb: 2 }} variant="h4">
-                      Submarine Cable System
-                    </Typography>
                     {/* Legend */}
                     <Box
                       sx={{
@@ -238,11 +286,38 @@ function AdminDashboard() {
                         />
                       </Box>
                     </Box>
-
                     {/* Map Container */}
                     <MapContainer style={{ height: mapHeight, width: '100%' }}>
-                      <ChangeView center={[19.5, 140]} zoom={3.5} />
+                      <ChangeView center={[16, 134]} zoom={3.5} />
                       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          top: 10,
+                          right: 10,
+                          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                          color: 'white',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          zIndex: 1000,
+                          fontSize: '14px',
+                          flexDirection: 'row'
+                        }}
+                      >
+                        <Typography variant="caption" color="gray">
+                          Total Active Capacity:
+                        </Typography>
+                        <Typography variant="h4" color="black">
+                          {stats.totalGbps} Gbps
+                        </Typography>
+
+                        <Typography variant="caption" color="gray">
+                          Average Utilization:
+                        </Typography>
+                        <Typography variant="h4" color="black">
+                          {stats.avgUtilization}%
+                        </Typography>
+                      </Box>
                       {/* Dynamic Hoverable Dot Markers*/}
                       <DynamicMarker
                         position={[1.380184, 125.036215]}

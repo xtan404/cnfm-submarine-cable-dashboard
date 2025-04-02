@@ -230,7 +230,10 @@ function TGNIA() {
     <>
       <Polyline
         positions={positions}
-        pathOptions={{ color: 'yellow', weight: 4 }}
+        pathOptions={{
+          color: stats.avgUtilization > 0 ? 'yellow' : 'red',
+          weight: 4
+        }}
         eventHandlers={{
           click: handleOpen // Open modal on click
         }}
@@ -238,7 +241,10 @@ function TGNIA() {
       {/* Hong Kong to Ballesteros Route */}
       <Polyline
         positions={hongKongToBallesteros}
-        pathOptions={{ color: 'yellow', weight: 4 }}
+        pathOptions={{
+          color: stats.avgUtilization > 0 ? 'yellow' : 'red',
+          weight: 4
+        }}
         eventHandlers={{
           click: handleOpen // Open modal on click
         }}

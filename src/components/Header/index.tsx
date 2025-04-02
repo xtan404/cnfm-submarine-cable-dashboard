@@ -41,7 +41,7 @@ const Header = () => {
       <AvatarWrapper>
         <img alt="CNFM-LOGO" src="/images//logos/CNFM-LOGO.png" />
       </AvatarWrapper>
-      <Typography variant="h4">Core Network & Facilities Management</Typography>
+      <Typography variant="h4">International Submarine Cable System</Typography>
     </Box>
   );
 };
