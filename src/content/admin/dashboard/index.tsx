@@ -7,9 +7,7 @@ import {
   Typography,
   useTheme,
   Container,
-  Button,
-  Snackbar,
-  Alert
+  Button
 } from '@mui/material';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -77,6 +75,7 @@ function AdminDashboard() {
   const theme = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mapHeight, setMapHeight] = useState('600px');
+  const [ipopUtilization, setIpopUtilization] = useState('0%');
   const [stats, setStats] = useState({
     data: [],
     totalGbps: 0,
@@ -104,54 +103,46 @@ function AdminDashboard() {
     return () => window.removeEventListener('resize', updateMapHeight);
   }, []);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleClearData = async () => {
+    // Confirmation dialog
+    const { isConfirmed } = await Swal.fire({
+      title: 'Warning!',
+      text: 'This action is irreversible. Do you want to proceed?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: 'black',
+      confirmButtonText: 'Yes'
+    });
 
-    if (file) {
-      if (file.type !== 'text/csv') {
+    if (!isConfirmed) return;
+
+    try {
+      const response = await fetch(
+        'http://192.168.254.225:8081/clear-utilization',
+        {
+          method: 'DELETE'
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
         Swal.fire({
-          icon: 'error',
-          title: 'Invalid File Type',
-          text: 'Please upload a .csv file.',
-          confirmButtonColor: '#d33'
+          title: 'Old data removed!',
+          text: result.message || 'Data has been cleared.',
+          icon: 'success',
+          confirmButtonColor: '#3854A5'
+        }).then(() => {
+          // ✅ Refresh the whole page after success
+          window.location.reload();
         });
-        return;
+      } else {
+        throw new Error(result.message || 'Failed to clear data');
       }
-
-      // Parse CSV File
-      Papa.parse(file, {
-        complete: (result) => {
-          console.log('Parsed CSV Data:', result.data);
-
-          // Send to backend
-          fetch('http://192.168.254.225:8081/upload-utilization', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ data: result.data })
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              Swal.fire({
-                icon: 'success',
-                title: 'Upload Successful!',
-                text: data.message,
-                confirmButtonColor: '#3085d6'
-              });
-            })
-            .catch((error) => {
-              console.error('Error uploading CSV:', error);
-              Swal.fire({
-                icon: 'error',
-                title: 'Upload Failed!',
-                text: 'Something went wrong.',
-                confirmButtonColor: '#d33'
-              });
-            });
-        },
-        header: true // Treat the first row as column names
-      });
+    } catch (error) {
+      Swal.fire('Error!', error.message || 'Something went wrong', 'error');
+      console.error('Clear error:', error);
     }
   };
 
@@ -200,9 +191,24 @@ function AdminDashboard() {
     fetchData();
   }, []); // ✅ Runs only once on mount
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click(); // Triggers file selection
-  };
+  useEffect(() => {
+    const fetchIpopUtil = async () => {
+      try {
+        const response = await fetch(
+          'http://192.168.254.225:8081/average-util'
+        );
+        const data = await response.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+          setIpopUtilization(data[0].a_side);
+        }
+      } catch (error) {
+        console.error('Error fetching IPOP utilization:', error);
+      }
+    };
+
+    fetchIpopUtil();
+  }, []);
 
   return (
     <>
@@ -262,8 +268,12 @@ function AdminDashboard() {
                         </Box>
                       ))}
                       <Box sx={{ flexGrow: 1 }} />
-
-                      {/* Upload Button & File Input */}
+                      <Box>
+                        <Typography variant="body2">
+                          Last Updated: {new Date().toLocaleString()}
+                        </Typography>
+                      </Box>
+                      {/* Clear Old Data Button */}
                       <Box
                         sx={{
                           display: 'flex',
@@ -274,16 +284,17 @@ function AdminDashboard() {
                         <Button
                           variant="contained"
                           startIcon={<AutorenewIcon />}
-                          onClick={handleUploadClick}
+                          onClick={handleClearData}
+                          color="error" // Red color for destructive action
+                          sx={{
+                            backgroundColor: '#d32f2f',
+                            '&:hover': {
+                              backgroundColor: '#b71c1c'
+                            }
+                          }}
                         >
-                          {' New Data'}
+                          {' Clear Data'}
                         </Button>
-                        <input
-                          type="file"
-                          ref={fileInputRef}
-                          style={{ display: 'none' }}
-                          accept=".csv"
-                        />
                       </Box>
                     </Box>
                     {/* Map Container */}
@@ -315,7 +326,7 @@ function AdminDashboard() {
                           Average Utilization:
                         </Typography>
                         <Typography variant="h4" color="black">
-                          {stats.avgUtilization}%
+                          {ipopUtilization}
                         </Typography>
                       </Box>
                       {/* Dynamic Hoverable Dot Markers*/}
