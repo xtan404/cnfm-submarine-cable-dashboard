@@ -17,9 +17,9 @@ import TGNIA from './TGNIA';
 import SeaUS from './SeaUS';
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Swal from 'sweetalert2';
-import Papa from 'papaparse';
 import Header from 'src/components/Header';
 
 function ChangeView({ center, zoom }) {
@@ -82,6 +82,7 @@ function AdminDashboard() {
     avgUtilization: 0,
     zeroUtilizationCount: 0
   });
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   // Function to update height dynamically
   const updateMapHeight = () => {
@@ -106,13 +107,13 @@ function AdminDashboard() {
   const handleClearData = async () => {
     // Confirmation dialog
     const { isConfirmed } = await Swal.fire({
-      title: 'Warning!',
-      text: 'This action is irreversible. Do you want to proceed?',
-      icon: 'warning',
+      title: 'Are you absolutely sure?',
+      text: 'This action cannot be undone. This will permanently remove all the data, do you want to proceed?',
       showCancelButton: true,
       confirmButtonColor: '#d33',
-      cancelButtonColor: 'black',
-      confirmButtonText: 'Yes'
+      cancelButtonColor: 'gray',
+      confirmButtonText: 'Continue',
+      reverseButtons: true
     });
 
     if (!isConfirmed) return;
@@ -210,6 +211,15 @@ function AdminDashboard() {
     fetchIpopUtil();
   }, []);
 
+  const handleNewDataClick = () => {
+    setOpenSnackbar(true);
+
+    // Open phpMyAdmin in a new tab
+    window.open(
+      'http://192.168.254.225/phpmyadmin/index.php?route=/table/import&db=cnfm_dashboard&table=utilization',
+      '_blank'
+    );
+  };
   return (
     <>
       <Helmet>
@@ -283,17 +293,27 @@ function AdminDashboard() {
                       >
                         <Button
                           variant="contained"
-                          startIcon={<AutorenewIcon />}
+                          startIcon={<DeleteForeverIcon />}
                           onClick={handleClearData}
-                          color="error" // Red color for destructive action
+                          color="error"
                           sx={{
                             backgroundColor: '#d32f2f',
                             '&:hover': {
                               backgroundColor: '#b71c1c'
-                            }
+                            },
+                            mx: 1
                           }}
                         >
                           {' Clear Data'}
+                        </Button>
+
+                        <Button
+                          variant="contained"
+                          startIcon={<UploadFileIcon />}
+                          onClick={handleNewDataClick}
+                          color="primary"
+                        >
+                          {' New Data'}
                         </Button>
                       </Box>
                     </Box>
