@@ -52,6 +52,7 @@ const C2CHongkong: React.FC = () => {
   const port = process.env.REACT_APP_PORT;
 
   useEffect(() => {
+    let interval;
     const fetchData = async () => {
       try {
         const response = await fetch(`${apiBaseUrl}${port}/c2c-hongkong`);
@@ -92,11 +93,15 @@ const C2CHongkong: React.FC = () => {
         console.log(err);
       }
     };
-
+    // Initial fetch
     fetchData();
-    const interval = setInterval(fetchData, 5000); // Fetch data every 5 seconds
 
-    return () => clearInterval(interval); // Cleanup interval on component unmount
+    // Only set interval if we don't have data yet
+    if (!stats.data) {
+      interval = setInterval(fetchData, 2000);
+    }
+
+    return () => clearInterval(interval);
   }, []); // ✅ Runs only once on mount
 
   //Chart Data and Styling

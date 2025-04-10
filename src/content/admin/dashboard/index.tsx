@@ -143,6 +143,7 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
+    let interval;
     const fetchData = async () => {
       try {
         const response = await fetch(`${apiBaseUrl}${port}/data-summary`);
@@ -181,14 +182,19 @@ function AdminDashboard() {
         console.log(err);
       }
     };
-
+    // Initial fetch
     fetchData();
-    const interval = setInterval(fetchData, 2000); // Fetch data every 3.5 seconds
 
-    return () => clearInterval(interval); // Cleanup interval on component unmount
+    // Only set interval if we don't have data yet
+    if (!stats.data) {
+      interval = setInterval(fetchData, 2000);
+    }
+
+    return () => clearInterval(interval);
   }, []); // ✅ Runs only once on mount
 
   useEffect(() => {
+    let interval;
     const fetchIpopUtil = async () => {
       try {
         const response = await fetch(`${apiBaseUrl}${port}/average-util`, {
@@ -209,8 +215,13 @@ function AdminDashboard() {
       }
     };
 
+    // Initial fetch
     fetchIpopUtil();
-    const interval = setInterval(fetchIpopUtil, 2000);
+
+    // Only set interval if we don't have data yet
+    if (!stats.data) {
+      interval = setInterval(fetchIpopUtil, 2000);
+    }
 
     return () => clearInterval(interval);
   }, []);
