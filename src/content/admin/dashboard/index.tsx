@@ -106,7 +106,6 @@ function AdminDashboard() {
   }, []);
 
   const handleClearData = async () => {
-    // Confirmation dialog
     const { isConfirmed } = await Swal.fire({
       title: 'Are you absolutely sure?',
       text: 'This action cannot be undone. This will permanently remove all the data, do you want to proceed?',
@@ -127,13 +126,17 @@ function AdminDashboard() {
       const result = await response.json();
 
       if (response.ok) {
-        Swal.fire({
+        await Swal.fire({
           title: 'Old data removed!',
           text: result.message || 'Data has been cleared.',
           icon: 'success',
           confirmButtonColor: '#3854A5'
         });
+
+        // ✅ Only reload after confirming the success alert
+        window.location.reload();
       } else {
+        // ❌ Throw only when not OK
         throw new Error(result.message || 'Failed to clear data');
       }
     } catch (error) {
@@ -143,13 +146,14 @@ function AdminDashboard() {
   };
 
   useEffect(() => {
-    let interval;
+    let interval: NodeJS.Timeout;
+
     const fetchData = async () => {
       try {
         const response = await fetch(`${apiBaseUrl}${port}/data-summary`);
         const result = await response.json();
 
-        if (Array.isArray(result)) {
+        if (Array.isArray(result) && result.length > 0) {
           const totalGbps = result.reduce(
             (sum, item) => sum + (item.gbps || 0),
             0
@@ -160,41 +164,40 @@ function AdminDashboard() {
             0
           );
 
-          const avgUtilization =
-            result.length > 0
-              ? parseFloat((totalUtilization / result.length).toFixed(2))
-              : 0;
+          const avgUtilization = parseFloat(
+            (totalUtilization / result.length).toFixed(2)
+          );
 
           const zeroCount = result.filter((item) => item.percent === 0).length;
 
-          // ✅ Set all state values in a single update
-          setStats((prev) => ({
-            ...prev,
+          setStats({
             data: result,
             totalGbps,
             avgUtilization,
             zeroUtilizationCount: zeroCount
-          }));
+          });
+
+          // ✅ Stop interval after successful fetch
+          clearInterval(interval);
         } else {
-          console.error('Unexpected API response format:', result);
+          console.log('No data received, retrying...');
         }
       } catch (err) {
-        console.log(err);
+        console.error('Error fetching data:', err);
       }
     };
-    // Initial fetch
+
+    // Run immediately on mount
     fetchData();
 
-    // Only set interval if we don't have data yet
-    if (!stats.data) {
-      interval = setInterval(fetchData, 2000);
-    }
+    // Set up interval to retry every 2s if no data yet
+    interval = setInterval(fetchData, 2000);
 
-    return () => clearInterval(interval);
-  }, []); // ✅ Runs only once on mount
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [apiBaseUrl, port]);
 
   useEffect(() => {
-    let interval;
+    let interval: NodeJS.Timeout;
     const fetchIpopUtil = async () => {
       try {
         const response = await fetch(`${apiBaseUrl}${port}/average-util`, {
@@ -206,6 +209,8 @@ function AdminDashboard() {
 
         if (Array.isArray(data) && data.length > 0) {
           setIpopUtilization(data[0].a_side);
+          // ✅ Stop interval after successful fetch
+          clearInterval(interval);
         } else {
           // Set to 0 or null or any fallback if no data
           setIpopUtilization('0%');
@@ -215,16 +220,14 @@ function AdminDashboard() {
       }
     };
 
-    // Initial fetch
+    // Run immediately on mount
     fetchIpopUtil();
 
-    // Only set interval if we don't have data yet
-    if (!stats.data) {
-      interval = setInterval(fetchIpopUtil, 2000);
-    }
+    // Set up interval to retry every 2s if no data yet
+    interval = setInterval(fetchIpopUtil, 2000);
 
-    return () => clearInterval(interval);
-  }, []);
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [apiBaseUrl, port]);
 
   const handleNewDataClick = () => {
     // Open phpMyAdmin in a new tab

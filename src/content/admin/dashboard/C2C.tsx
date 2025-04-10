@@ -153,13 +153,14 @@ function C2C() {
   });
 
   useEffect(() => {
-    let interval;
+    let interval: NodeJS.Timeout;
+
     const fetchData = async () => {
       try {
         const response = await fetch(`${apiBaseUrl}${port}/c2c`);
         const result = await response.json();
 
-        if (Array.isArray(result)) {
+        if (Array.isArray(result) && result.length > 0) {
           const totalGbps = result.reduce(
             (sum, item) => sum + (item.gbps_capacity || 0),
             0
@@ -170,40 +171,40 @@ function C2C() {
             0
           );
 
-          const avgUtilization =
-            result.length > 0
-              ? parseFloat((totalUtilization / result.length).toFixed(2))
-              : 0;
+          const avgUtilization = parseFloat(
+            (totalUtilization / result.length).toFixed(2)
+          );
 
           const zeroCount = result.filter(
             (item) => item.percent_utilization === 0
           ).length;
 
           // ✅ Set all state values in a single update
-          setStats((prev) => ({
-            ...prev,
+          setStats({
             data: result,
             totalGbps,
             avgUtilization,
             zeroUtilizationCount: zeroCount
-          }));
+          });
+
+          // ✅ Stop interval after successful fetch
+          clearInterval(interval);
         } else {
-          console.error('Unexpected API response format:', result);
+          console.log('No data received, retrying...');
         }
       } catch (err) {
-        console.log(err);
+        console.error('Error fetching data:', err);
       }
     };
-    // Initial fetch
+
+    // Run immediately on mount
     fetchData();
 
-    // Only set interval if we don't have data yet
-    if (!stats.data) {
-      interval = setInterval(fetchData, 2000);
-    }
+    // Set up interval to retry every 2s if no data yet
+    interval = setInterval(fetchData, 2000);
 
-    return () => clearInterval(interval);
-  }, []); // ✅ Runs only once on mount
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [apiBaseUrl, port]);
 
   const zeroCount = stats.data.filter(
     (item) => item.percent_utilization === 0
