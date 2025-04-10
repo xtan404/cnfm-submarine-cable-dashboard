@@ -48,13 +48,13 @@ const SJCSingapore: React.FC = () => {
     avgUtilization: 0,
     zeroUtilizationCount: 0
   });
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const port = process.env.REACT_APP_PORT;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          'http://192.168.254.225:8081/sjc-singapore'
-        );
+        const response = await fetch(`${apiBaseUrl}${port}/sjc-singapore`);
         const result = await response.json();
 
         if (Array.isArray(result)) {
@@ -94,6 +94,9 @@ const SJCSingapore: React.FC = () => {
     };
 
     fetchData();
+    const interval = setInterval(fetchData, 5000); // Fetch data every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []); // ✅ Runs only once on mount
 
   //Chart Data and Styling

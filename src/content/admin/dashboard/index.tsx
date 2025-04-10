@@ -82,7 +82,8 @@ function AdminDashboard() {
     avgUtilization: 0,
     zeroUtilizationCount: 0
   });
-  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const port = process.env.REACT_APP_PORT;
 
   // Function to update height dynamically
   const updateMapHeight = () => {
@@ -119,12 +120,9 @@ function AdminDashboard() {
     if (!isConfirmed) return;
 
     try {
-      const response = await fetch(
-        'http://192.168.254.225:8081/clear-utilization',
-        {
-          method: 'DELETE'
-        }
-      );
+      const response = await fetch(`${apiBaseUrl}${port}/clear-utilization`, {
+        method: 'DELETE'
+      });
 
       const result = await response.json();
 
@@ -134,9 +132,6 @@ function AdminDashboard() {
           text: result.message || 'Data has been cleared.',
           icon: 'success',
           confirmButtonColor: '#3854A5'
-        }).then(() => {
-          // ✅ Refresh the whole page after success
-          window.location.reload();
         });
       } else {
         throw new Error(result.message || 'Failed to clear data');
@@ -150,9 +145,7 @@ function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(
-          'http://192.168.254.225:8081/data-summary'
-        );
+        const response = await fetch(`${apiBaseUrl}${port}/data-summary`);
         const result = await response.json();
 
         if (Array.isArray(result)) {
@@ -190,18 +183,26 @@ function AdminDashboard() {
     };
 
     fetchData();
+    const interval = setInterval(fetchData, 2000); // Fetch data every 3.5 seconds
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []); // ✅ Runs only once on mount
 
   useEffect(() => {
     const fetchIpopUtil = async () => {
       try {
-        const response = await fetch(
-          'http://192.168.254.225:8081/average-util'
-        );
+        const response = await fetch(`${apiBaseUrl}${port}/average-util`, {
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
         const data = await response.json();
 
         if (Array.isArray(data) && data.length > 0) {
           setIpopUtilization(data[0].a_side);
+        } else {
+          // Set to 0 or null or any fallback if no data
+          setIpopUtilization('0%');
         }
       } catch (error) {
         console.error('Error fetching IPOP utilization:', error);
@@ -209,17 +210,19 @@ function AdminDashboard() {
     };
 
     fetchIpopUtil();
+    const interval = setInterval(fetchIpopUtil, 2000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const handleNewDataClick = () => {
-    setOpenSnackbar(true);
-
     // Open phpMyAdmin in a new tab
     window.open(
-      'http://192.168.254.225/phpmyadmin/index.php?route=/table/import&db=cnfm_dashboard&table=utilization',
+      `${apiBaseUrl}/phpmyadmin/index.php?route=/table/import&db=cnfm_dashboard&table=utilization`,
       '_blank'
     );
   };
+
   return (
     <>
       <Helmet>
@@ -280,7 +283,7 @@ function AdminDashboard() {
                       <Box sx={{ flexGrow: 1 }} />
                       <Box>
                         <Typography variant="body2">
-                          Last Updated: {new Date().toLocaleString()}
+                          Last Updated: {new Date().toLocaleDateString()}
                         </Typography>
                       </Box>
                       {/* Clear Old Data Button */}

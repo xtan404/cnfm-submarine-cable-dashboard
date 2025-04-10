@@ -150,6 +150,8 @@ function SeaUS() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(0);
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const port = process.env.REACT_APP_PORT;
 
   // ✅ Combine all related state values into one object
   const [stats, setStats] = useState({
@@ -162,7 +164,7 @@ function SeaUS() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('http://192.168.254.225:8081/sea-us');
+        const response = await fetch(`${apiBaseUrl}${port}/sea-us`);
         const result = await response.json();
 
         if (Array.isArray(result)) {
@@ -202,6 +204,9 @@ function SeaUS() {
     };
 
     fetchData();
+    const interval = setInterval(fetchData, 2000); // Fetch data every 5 seconds
+
+    return () => clearInterval(interval); // Cleanup interval on component unmount
   }, []); // ✅ Runs only once on mount
 
   const zeroCount = stats.data.filter(
