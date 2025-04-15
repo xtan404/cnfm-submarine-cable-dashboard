@@ -9,60 +9,11 @@ import {
   Container,
   Button
 } from '@mui/material';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import SJC from './SJC';
-import C2C from './C2C';
-import TGNIA from './TGNIA';
-import SeaUS from './SeaUS';
-import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Swal from 'sweetalert2';
 import Header from 'src/components/Header';
-
-function ChangeView({ center, zoom }) {
-  const map = useMap();
-  map.setView(center, zoom);
-  return null;
-}
-
-function DynamicMarker({ position, label }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (position) {
-      // Create a custom pane for markers to be above polylines
-      map.createPane('markerPane');
-      map.getPane('markerPane').style.zIndex = 650;
-
-      const marker = L.circleMarker(position, {
-        radius: 4, // Small dot size
-        color: 'gray', // Border color
-        fillColor: 'white', // Dot color
-        fillOpacity: 1,
-        pane: 'markerPane' // Assign to custom pane
-      }).addTo(map);
-
-      // Add Tooltip (Now only appears on hover)
-      marker.bindTooltip(
-        `<span style="font-size: 14px; font-weight: bold;">${label}</span>`,
-        {
-          direction: 'top',
-          offset: [0, -5], // Adjust offset for better visibility
-          opacity: 1 // Fully visible when shown
-        }
-      );
-
-      return () => {
-        map.removeLayer(marker); // Cleanup marker on unmount
-      };
-    }
-  }, [position, map, label]);
-
-  return null;
-}
+import CableMap from '../components/CableMap';
 
 const legendItems = [
   { name: 'SJC', color: 'blue' },
@@ -73,37 +24,8 @@ const legendItems = [
 
 function AdminDashboard() {
   const theme = useTheme();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [mapHeight, setMapHeight] = useState('600px');
-  const [ipopUtilization, setIpopUtilization] = useState('0%');
-  const [stats, setStats] = useState({
-    data: [],
-    totalGbps: 0,
-    avgUtilization: 0,
-    zeroUtilizationCount: 0
-  });
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
-
-  // Function to update height dynamically
-  const updateMapHeight = () => {
-    const screenWidth = window.innerWidth;
-
-    if (screenWidth > 1600) {
-      setMapHeight('800px');
-    } else if (screenWidth > 1200) {
-      setMapHeight('700px');
-    } else {
-      setMapHeight('600px');
-    }
-  };
-
-  // Listen for window resize
-  useEffect(() => {
-    updateMapHeight(); // Set initial height
-    window.addEventListener('resize', updateMapHeight);
-    return () => window.removeEventListener('resize', updateMapHeight);
-  }, []);
 
   const handleClearData = async () => {
     const { isConfirmed } = await Swal.fire({
@@ -144,90 +66,6 @@ function AdminDashboard() {
       console.error('Clear error:', error);
     }
   };
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-
-    const fetchData = async () => {
-      try {
-        const response = await fetch(`${apiBaseUrl}${port}/data-summary`);
-        const result = await response.json();
-
-        if (Array.isArray(result) && result.length > 0) {
-          const totalGbps = result.reduce(
-            (sum, item) => sum + (item.gbps || 0),
-            0
-          );
-
-          const totalUtilization = result.reduce(
-            (sum, item) => sum + (item.percent || 0),
-            0
-          );
-
-          const avgUtilization = parseFloat(
-            (totalUtilization / result.length).toFixed(2)
-          );
-
-          const zeroCount = result.filter((item) => item.percent === 0).length;
-
-          setStats({
-            data: result,
-            totalGbps,
-            avgUtilization,
-            zeroUtilizationCount: zeroCount
-          });
-
-          // ✅ Stop interval after successful fetch
-          clearInterval(interval);
-        } else {
-          console.log('No data received, retrying...');
-        }
-      } catch (err) {
-        console.error('Error fetching data:', err);
-      }
-    };
-
-    // Run immediately on mount
-    fetchData();
-
-    // Set up interval to retry every 2s if no data yet
-    interval = setInterval(fetchData, 2000);
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [apiBaseUrl, port]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
-    const fetchIpopUtil = async () => {
-      try {
-        const response = await fetch(`${apiBaseUrl}${port}/average-util`, {
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
-        });
-        const data = await response.json();
-
-        if (Array.isArray(data) && data.length > 0) {
-          setIpopUtilization(data[0].a_side);
-          // ✅ Stop interval after successful fetch
-          clearInterval(interval);
-        } else {
-          // Set to 0 or null or any fallback if no data
-          setIpopUtilization('0%');
-        }
-      } catch (error) {
-        console.error('Error fetching IPOP utilization:', error);
-      }
-    };
-
-    // Run immediately on mount
-    fetchIpopUtil();
-
-    // Set up interval to retry every 2s if no data yet
-    interval = setInterval(fetchIpopUtil, 2000);
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [apiBaseUrl, port]);
 
   const handleNewDataClick = () => {
     // Open phpMyAdmin in a new tab
@@ -335,83 +173,7 @@ function AdminDashboard() {
                       </Box>
                     </Box>
                     {/* Map Container */}
-                    <MapContainer style={{ height: mapHeight, width: '100%' }}>
-                      <ChangeView center={[16, 134]} zoom={3.5} />
-                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                      <Box
-                        sx={{
-                          position: 'absolute',
-                          top: 10,
-                          right: 10,
-                          backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                          color: 'white',
-                          padding: '8px 12px',
-                          borderRadius: '8px',
-                          zIndex: 1000,
-                          fontSize: '14px',
-                          flexDirection: 'row'
-                        }}
-                      >
-                        <Typography variant="caption" color="gray">
-                          Total Active Capacity:
-                        </Typography>
-                        <Typography variant="h4" color="black">
-                          {stats.totalGbps} Gbps
-                        </Typography>
-
-                        <Typography variant="caption" color="gray">
-                          Average Utilization:
-                        </Typography>
-                        <Typography variant="h4" color="black">
-                          {ipopUtilization}
-                        </Typography>
-                      </Box>
-                      {/* Dynamic Hoverable Dot Markers*/}
-                      <DynamicMarker
-                        position={[1.380184, 125.036215]}
-                        label="Kauditan, Indonesia"
-                      />
-                      <DynamicMarker
-                        position={[7.043717, 125.542204]}
-                        label="Davao, Philippines"
-                      />
-                      <DynamicMarker
-                        position={[13.4443, 144.7937]}
-                        label="Guam"
-                      />
-                      <DynamicMarker
-                        position={[21.4671, 201.7798]}
-                        label="Makaha, Hawaii, USA"
-                      />
-                      <DynamicMarker
-                        position={[33.8622, 241.6005]}
-                        label="Hermosa Beach, California, USA"
-                      />
-                      <DynamicMarker
-                        position={[14.0665, 120.612]}
-                        label="Nasugbu, Philippines"
-                      />
-                      <DynamicMarker
-                        position={[18.4088, 121.512596]}
-                        label="Ballesteros, Philippines"
-                      />
-                      <DynamicMarker
-                        position={[35.015, 139.9533]}
-                        label="Japan"
-                      />
-                      <DynamicMarker
-                        position={[22.2096, 114.2028]}
-                        label="Hong Kong"
-                      />
-                      <DynamicMarker
-                        position={[1.3214, 103.6513]}
-                        label="Singapore"
-                      />
-                      <SeaUS />
-                      <SJC />
-                      <C2C />
-                      <TGNIA />
-                    </MapContainer>
+                    <CableMap />
                   </Box>
                 </Grid>
               </Grid>

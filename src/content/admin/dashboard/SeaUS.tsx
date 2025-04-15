@@ -136,16 +136,6 @@ function a11yProps(index: number) {
   };
 }
 
-interface SeaUSCable {
-  site: string;
-  cable: string;
-  globe_circuit_id: string;
-  link: string;
-  gbps_capacity: number;
-  percent_utilization: number;
-  remarks: string;
-}
-
 function SeaUS() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);

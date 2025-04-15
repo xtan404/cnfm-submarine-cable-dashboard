@@ -111,7 +111,7 @@ const Seattle: React.FC = () => {
   const zeroCount = stats.data.filter(
     (item) => item.percent_utilization === 0
   ).length;
-  const adjustedChartData = chartData.map((val) => (val === 0 ? 0.5 : val)); // Ensure bars have a small value
+  const adjustedChartData = chartData.map((val) => (val === 0 ? 1 : val)); // Ensure bars have a small value
 
   const chartOptions: ApexOptions = {
     chart: {
