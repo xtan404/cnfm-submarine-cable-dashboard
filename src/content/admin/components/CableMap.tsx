@@ -193,8 +193,6 @@ const CableMap = () => {
     return () => clearInterval(interval); // Cleanup on unmount
   }, [apiBaseUrl, port]);
 
-  const diffValue = parseFloat(ipopDifference);
-
   return (
     <>
       {/* Map Container */}
@@ -227,29 +225,31 @@ const CableMap = () => {
           </Typography>
           <Typography variant="h4" color="black">
             {ipopUtilization}
-            <Box
-              sx={(theme) => {
-                const diff = parseFloat(ipopDifference);
+            {parseFloat(ipopDifference) !== 0 && (
+              <Box
+                sx={(theme) => {
+                  const diff = parseFloat(ipopDifference);
 
-                return {
-                  display: 'inline-block',
-                  padding: '2px 10px',
-                  borderRadius: '999px',
-                  fontWeight: 'bold',
-                  fontSize: '14px',
-                  backgroundColor:
-                    diff < 0
-                      ? theme.colors.success.lighter
-                      : theme.colors.error.lighter,
-                  color:
-                    diff < 0
-                      ? theme.colors.success.main
-                      : theme.colors.error.main
-                };
-              }}
-            >
-              {ipopDifference}
-            </Box>
+                  return {
+                    display: 'inline-block',
+                    padding: '2px 10px',
+                    borderRadius: '999px',
+                    fontWeight: 'bold',
+                    fontSize: '14px',
+                    backgroundColor:
+                      diff < 0
+                        ? theme.colors.error.lighter
+                        : theme.colors.success.lighter,
+                    color:
+                      diff < 0
+                        ? theme.colors.error.main
+                        : theme.colors.success.main
+                  };
+                }}
+              >
+                {ipopDifference}
+              </Box>
+            )}
           </Typography>
         </Box>
         {/* Dynamic Hoverable Dot Markers*/}

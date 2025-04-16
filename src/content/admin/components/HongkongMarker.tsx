@@ -14,7 +14,11 @@ import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
+import {
+  ArrowDownward,
+  ArrowUpward,
+  HorizontalRule
+} from '@mui/icons-material';
 
 type DynamicMarkerProps = {
   position: [number, number];
@@ -99,34 +103,41 @@ const HongkongMarker = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const fetchHongkongMarkerData = async () => {
-    try {
-      const res = await fetch(`${apiBaseUrl}${port}/hongkong-marker`);
-      const json = await res.json();
-
-      // Calculate total for center display
-      const totalCapacity = json.reduce((acc, item) => acc + item.value, 0);
-
-      // Get the shared overall utilization
-      const avgUtilizationOverall =
-        json.length > 0 ? json[0].avgUtilizationOverall : 0;
-
-      // Get the difference of the overall utilization and the previous one
-      const prevAvgUtil = json.length > 0 ? json[0].prevAvgUtil : 0;
-      const utilDifference = avgUtilizationOverall - prevAvgUtil;
-
-      setData(json);
-      setTotal(totalCapacity);
-      setAverageUtilization(avgUtilizationOverall);
-      setAverageDifference(Number(utilDifference.toFixed(2)));
-    } catch (err) {
-      console.error('Failed to fetch Hong Kong marker data:', err);
-    }
-  };
-
   useEffect(() => {
-    fetchHongkongMarkerData(); // fetch on component mount
-  }, [apiBaseUrl, port]);
+    let interval;
+    const fetchHongkongMarkerData = async () => {
+      try {
+        const res = await fetch(`${apiBaseUrl}${port}/hongkong-marker`);
+        const json = await res.json();
+
+        // Calculate total for center display
+        const totalCapacity = json.reduce((acc, item) => acc + item.value, 0);
+
+        // Get the shared overall utilization
+        const avgUtilizationOverall =
+          json.length > 0 ? json[0].avgUtilizationOverall : 0;
+
+        // Get the difference of the overall utilization and the previous one
+        const prevAvgUtil = json.length > 0 ? json[0].prevAvgUtil : 0;
+        const utilDifference = avgUtilizationOverall - prevAvgUtil;
+
+        setData(json);
+        setTotal(totalCapacity);
+        setAverageUtilization(avgUtilizationOverall);
+        setAverageDifference(Number(utilDifference.toFixed(2)));
+      } catch (err) {
+        console.error('Failed to fetch Hong Kong marker data:', err);
+      }
+    };
+    // Initial fetch
+    fetchHongkongMarkerData();
+    // Only set interval if we don't have data yet
+    if (data) {
+      interval = setInterval(fetchHongkongMarkerData, 5000);
+    }
+
+    return () => clearInterval(interval);
+  }, [apiBaseUrl, port]); // ✅ Runs only once on mount
 
   const CustomTooltip = ({ active, payload, total }: any) => {
     if (active && payload && payload.length) {
@@ -212,7 +223,7 @@ const HongkongMarker = () => {
                 color="text.secondary"
                 gutterBottom
               >
-                Total Capacity: {total} Gbps
+                Total Drop: {total} Gbps
               </Typography>
 
               {/* Donut Chart */}
@@ -269,7 +280,13 @@ const HongkongMarker = () => {
               <Box mt={2} sx={{ textAlign: 'center' }}>
                 <Typography
                   variant="body1"
-                  color={averageDifference < 0 ? 'success.main' : 'error.main'}
+                  color={
+                    averageDifference < 0
+                      ? 'error.main'
+                      : averageDifference > 0
+                      ? 'success.main'
+                      : 'text.primary'
+                  }
                   fontWeight="bold"
                   display="flex"
                   alignItems="center"
@@ -278,11 +295,16 @@ const HongkongMarker = () => {
                 >
                   {averageDifference < 0 ? (
                     <ArrowDownward fontSize="small" />
-                  ) : (
+                  ) : averageDifference > 0 ? (
                     <ArrowUpward fontSize="small" />
+                  ) : (
+                    <HorizontalRule fontSize="small" /> // or any neutral icon
                   )}
-                  {Math.abs(averageDifference)}% in utilization compared to last
-                  data
+                  {averageDifference === 0
+                    ? 'No change in utilization'
+                    : `${Math.abs(
+                        averageDifference
+                      )}% in utilization compared to last data`}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Based on the average utilization of C2C, SJC, and TGNIA cable
