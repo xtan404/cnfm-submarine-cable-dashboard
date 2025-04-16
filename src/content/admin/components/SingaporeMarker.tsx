@@ -14,7 +14,7 @@ import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { PieChart, Pie, Cell, Tooltip } from 'recharts';
-import { ArrowUpward } from '@mui/icons-material';
+import { ArrowDownward, ArrowUpward } from '@mui/icons-material';
 
 type DynamicMarkerProps = {
   position: [number, number];
@@ -91,6 +91,7 @@ const SingaporeMarker = () => {
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
   const [averageUtilization, setAverageUtilization] = useState(0);
+  const [averageDifference, setAverageDifference] = useState(0);
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
 
@@ -110,9 +111,14 @@ const SingaporeMarker = () => {
       const avgUtilizationOverall =
         json.length > 0 ? json[0].avgUtilizationOverall : 0;
 
+      // Get the difference of the overall utilization and the previous one
+      const prevAvgUtil = json.length > 0 ? json[0].prevAvgUtil : 0;
+      const utilDifference = avgUtilizationOverall - prevAvgUtil;
+
       setData(json);
       setTotal(totalCapacity);
       setAverageUtilization(avgUtilizationOverall);
+      setAverageDifference(Number(utilDifference.toFixed(2)));
     } catch (err) {
       console.error('Failed to fetch Singapore marker data:', err);
     }
@@ -263,18 +269,23 @@ const SingaporeMarker = () => {
               <Box mt={2} sx={{ textAlign: 'center' }}>
                 <Typography
                   variant="body1"
-                  color="success.main"
+                  color={averageDifference < 0 ? 'success.main' : 'error.main'}
                   fontWeight="bold"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
                   gap={0.5}
                 >
-                  <ArrowUpward fontSize="small" />
-                  5.2% in utilization compared to last data
+                  {averageDifference < 0 ? (
+                    <ArrowDownward fontSize="small" />
+                  ) : (
+                    <ArrowUpward fontSize="small" />
+                  )}
+                  {Math.abs(averageDifference)}% in utilization compared to last
+                  data
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Based on average utilization of all cables
+                  Based on the average utilization of all cables
                 </Typography>
               </Box>
             </Box>

@@ -73,10 +73,10 @@ function DynamicMarker({ position, label, icon, onClick }: DynamicMarkerProps) {
   return null;
 }
 
-const hongKongFlagIcon = L.icon({
-  iconUrl: '/static/images/overview/hongkong-flag-marker.png', // ✅ adjust path as needed
+const USAFlagIcon = L.icon({
+  iconUrl: '/static/images/overview/usa-flag-marker.png', // ✅ adjust path as needed
   iconSize: [36, 36], // ✅ size of the icon
-  iconAnchor: [20, 36], // ✅ where to anchor the icon
+  iconAnchor: [16, 32], // ✅ where to anchor the icon
   popupAnchor: [0, -32] // optional: for any popups
 });
 
@@ -86,7 +86,7 @@ const renderLabel = ({ name, value, percent }: any) => {
   return `${(percent * 100).toFixed(0)}%`;
 };
 
-const HongkongMarker = () => {
+const USAMarker = () => {
   const [open, setOpen] = useState(false);
   const [data, setData] = useState([]);
   const [total, setTotal] = useState(0);
@@ -99,9 +99,9 @@ const HongkongMarker = () => {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const fetchHongkongMarkerData = async () => {
+  const fetchUSAMarkerData = async () => {
     try {
-      const res = await fetch(`${apiBaseUrl}${port}/hongkong-marker`);
+      const res = await fetch(`${apiBaseUrl}${port}/usa-marker`);
       const json = await res.json();
 
       // Calculate total for center display
@@ -120,12 +120,12 @@ const HongkongMarker = () => {
       setAverageUtilization(avgUtilizationOverall);
       setAverageDifference(Number(utilDifference.toFixed(2)));
     } catch (err) {
-      console.error('Failed to fetch Hong Kong marker data:', err);
+      console.error('Failed to fetch USA marker data:', err);
     }
   };
 
   useEffect(() => {
-    fetchHongkongMarkerData(); // fetch on component mount
+    fetchUSAMarkerData(); // fetch on component mount
   }, [apiBaseUrl, port]);
 
   const CustomTooltip = ({ active, payload, total }: any) => {
@@ -182,15 +182,15 @@ const HongkongMarker = () => {
   return (
     <>
       <DynamicMarker
-        position={[22.2096, 114.2028]}
-        label="Hong Kong"
-        icon={hongKongFlagIcon}
+        position={[33.8622, 241.6005]}
+        label="Hermosa Beach, California, USA"
+        icon={USAFlagIcon}
         onClick={handleOpen}
       />
       {/* Modal Dialog */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>
-          <Typography variant="h5">Submarine Cables - Hong Kong</Typography>
+          <Typography variant="h5">Submarine Cable - USA</Typography>
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pb: 1 }}>
@@ -205,7 +205,7 @@ const HongkongMarker = () => {
               }}
             >
               <Typography variant="h6" gutterBottom>
-                Hong Kong Site
+                Los Angeles & Seattle
               </Typography>
               <Typography
                 variant="subtitle2"
@@ -301,4 +301,4 @@ const HongkongMarker = () => {
   );
 };
 
-export default HongkongMarker;
+export default USAMarker;

@@ -10,6 +10,7 @@ import TGNIA from '../dashboard/TGNIA';
 import JapanMarker from './JapanMarker';
 import HongkongMarker from './HongkongMarker';
 import SingaporeMarker from './SingaporeMarker';
+import USAMarker from './USAMarker';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -265,10 +266,7 @@ const CableMap = () => {
           position={[21.4671, 201.7798]}
           label="Makaha, Hawaii, USA"
         />
-        <DynamicMarker
-          position={[33.8622, 241.6005]}
-          label="Hermosa Beach, California, USA"
-        />
+        <USAMarker />
         <DynamicMarker
           position={[14.0665, 120.612]}
           label="Nasugbu, Philippines"
