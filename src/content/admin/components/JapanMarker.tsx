@@ -9,7 +9,7 @@ import {
   Divider,
   CardContent
 } from '@mui/material';
-import { MapContainer, TileLayer, useMap, Marker } from 'react-leaflet';
+import { useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
@@ -80,73 +80,98 @@ const japanFlagIcon = L.icon({
   popupAnchor: [0, -32] // optional: for any popups
 });
 
-const data = [
-  { name: 'SJC', value: 200 },
-  { name: 'C2C', value: 200 },
-  { name: 'TGNIA', value: 270 }
-];
-
-const COLORS = ['#3854A5', '#5590CC', '#57B0DD'];
+const COLORS = ['#3854A5', '#5590CC', '#57B0DD', '#C7D9EF', '#F1F4FA'];
 
 const renderLabel = ({ name, value, percent }: any) => {
-  return `${(percent * 100).toFixed(1)}%`;
-};
-
-const CustomTooltip = ({ active, payload }: any) => {
-  if (active && payload && payload.length) {
-    const total =
-      payload[0].payload?.total || data.reduce((acc, d) => acc + d.value, 0);
-    const percentage = ((payload[0].value / total) * 100).toFixed(1);
-
-    return (
-      <Box
-        sx={{
-          backgroundColor: 'white',
-          border: '1px solid #ccc',
-          borderRadius: 2,
-          padding: 1.5,
-          boxShadow: '0px 2px 8px rgba(0,0,0,0.15)',
-          zIndex: 9999
-        }}
-      >
-        <Box display="flex" alignItems="center" gap={1}>
-          <Box
-            sx={{
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              backgroundColor: payload[0].payload.fill || payload[0].color
-            }}
-          />
-          <Typography variant="body2" fontWeight="bold">
-            {payload[0].name}
-          </Typography>
-        </Box>
-        <Box display="flex" gap={1}>
-          <Typography variant="body2" sx={{ minWidth: 74 }}>
-            Capacity:
-          </Typography>
-          <Typography variant="body2">{payload[0].value} Gbps</Typography>
-        </Box>
-        <Box display="flex" gap={1}>
-          {/*<Typography variant="body2" sx={{ minWidth: 80 }}>
-            Utilization:
-          </Typography>
-          <Typography variant="body2">{percentage}%</Typography>*/}
-        </Box>
-      </Box>
-    );
-  }
-
-  return null;
+  return `${(percent * 100).toFixed(0)}%`;
 };
 
 const JapanMarker = () => {
   const [open, setOpen] = useState(false);
+  const [data, setData] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [averageUtilization, setAverageUtilization] = useState(0);
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const port = process.env.REACT_APP_PORT;
 
   // Handle Dialog Open/Close
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const fetchJapanMarkerData = async () => {
+    try {
+      const res = await fetch(`${apiBaseUrl}${port}/japan-marker`);
+      const json = await res.json();
+
+      // Calculate total for center display
+      const totalCapacity = json.reduce((acc, item) => acc + item.value, 0);
+
+      // Get the shared overall utilization
+      const avgUtilizationOverall =
+        json.length > 0 ? json[0].avgUtilizationOverall : 0;
+
+      setData(json);
+      setTotal(totalCapacity);
+      setAverageUtilization(avgUtilizationOverall);
+    } catch (err) {
+      console.error('Failed to fetch Japan marker data:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchJapanMarkerData(); // fetch on component mount
+  }, [apiBaseUrl, port]);
+
+  const CustomTooltip = ({ active, payload, total }: any) => {
+    if (active && payload && payload.length) {
+      const item = payload[0];
+      const { name, value, payload: itemPayload } = item;
+      const utilization = itemPayload.avgUtilization?.toFixed(2) || 'N/A';
+
+      return (
+        <Box
+          sx={{
+            backgroundColor: 'white',
+            border: '1px solid #ccc',
+            borderRadius: 2,
+            padding: 1.5,
+            boxShadow: '0px 2px 8px rgba(0,0,0,0.15)',
+            zIndex: 9999
+          }}
+        >
+          <Box display="flex" alignItems="center" gap={1}>
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                backgroundColor: itemPayload.fill || item.color
+              }}
+            />
+            <Typography variant="body2" fontWeight="bold">
+              {name}
+            </Typography>
+          </Box>
+
+          <Box display="flex" gap={1}>
+            <Typography variant="body2" sx={{ minWidth: 74 }}>
+              Capacity:
+            </Typography>
+            <Typography variant="body2">{value} Gbps</Typography>
+          </Box>
+
+          <Box display="flex" gap={1}>
+            <Typography variant="body2" sx={{ minWidth: 80 }}>
+              Utilization:
+            </Typography>
+            <Typography variant="body2">{utilization}%</Typography>
+          </Box>
+        </Box>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <>
@@ -159,7 +184,7 @@ const JapanMarker = () => {
       {/* Modal Dialog */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>
-          <Typography variant="h5">Japan Site</Typography>
+          <Typography variant="h5">Submarine Cables - Japan</Typography>
         </DialogTitle>
         <Divider />
         <DialogContent sx={{ pb: 1 }}>
@@ -174,14 +199,14 @@ const JapanMarker = () => {
               }}
             >
               <Typography variant="h6" gutterBottom>
-                Submarine Cables - Japan
+                Japan Site
               </Typography>
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
                 gutterBottom
               >
-                Current Data
+                Total Capacity: {total} Gbps
               </Typography>
 
               {/* Donut Chart */}
@@ -197,11 +222,14 @@ const JapanMarker = () => {
                     dataKey="value"
                     startAngle={90}
                     endAngle={450}
-                    label={renderLabel} // 👈 display share directly
-                    labelLine={false} // optional: hides the connector lines
+                    label={renderLabel}
+                    labelLine={false}
                   >
                     {data.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
                     ))}
                   </Pie>
                   <Tooltip
@@ -223,10 +251,10 @@ const JapanMarker = () => {
                   }}
                 >
                   <Typography variant="h2" fontWeight="bold">
-                    670
+                    {averageUtilization}%
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Total Gbps
+                    Average Utilization
                   </Typography>
                 </Box>
               </Box>
@@ -246,7 +274,7 @@ const JapanMarker = () => {
                   5.2% in utilization compared to last data
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Based on total Gbps utilization
+                  Based on average utilization of all cables
                 </Typography>
               </Box>
             </Box>
