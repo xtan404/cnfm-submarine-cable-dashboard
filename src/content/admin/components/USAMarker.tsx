@@ -285,7 +285,7 @@ const USAMarker = () => {
                   data
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Based on the average utilization of all cables
+                  Based on the average utilization of SEA-US cable
                 </Typography>
               </Box>
             </Box>

@@ -285,7 +285,7 @@ const HongkongMarker = () => {
                   data
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Based on the average utilization of all cables
+                  Based on the average utilization of C2C, SJC, and TGNIA cable
                 </Typography>
               </Box>
             </Box>

@@ -239,12 +239,12 @@ const CableMap = () => {
                   fontSize: '14px',
                   backgroundColor:
                     diff < 0
-                      ? theme.colors.error.lighter
-                      : theme.colors.success.lighter,
+                      ? theme.colors.success.lighter
+                      : theme.colors.error.lighter,
                   color:
                     diff < 0
-                      ? theme.colors.error.main
-                      : theme.colors.success.main
+                      ? theme.colors.success.main
+                      : theme.colors.error.main
                 };
               }}
             >

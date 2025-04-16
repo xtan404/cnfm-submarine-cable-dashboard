@@ -9,6 +9,7 @@ const FooterWrapper = styled(Container)(
 );
 
 function Footer() {
+  const currentYear = new Date().getFullYear();
   return (
     <FooterWrapper className="footer-wrapper" maxWidth="md">
       <Box
@@ -20,7 +21,7 @@ function Footer() {
         textAlign="center"
       >
         <Typography variant="subtitle1">
-          &copy; 2025 - All rights reserved
+          &copy; {currentYear} - All rights reserved
         </Typography>
       </Box>
     </FooterWrapper>
