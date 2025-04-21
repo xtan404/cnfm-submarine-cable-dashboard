@@ -307,7 +307,7 @@ const USAMarker = () => {
                       )}% in utilization compared to last data`}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Based on the average utilization of C2C, SJC, and TGNIA cable
+                  Based on the average utilization of SEA-US cable
                 </Typography>
               </Box>
             </Box>
