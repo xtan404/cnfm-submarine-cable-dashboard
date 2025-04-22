@@ -111,7 +111,10 @@ const USAMarker = () => {
         const json = await res.json();
 
         // Calculate total for center display
-        const totalCapacity = json.reduce((acc, item) => acc + item.value, 0);
+        const totalCapacity = json.reduce(
+          (acc, item) => acc + parseFloat(item.value || 0),
+          0
+        );
 
         // Get the shared overall utilization
         const avgUtilizationOverall =

@@ -14,6 +14,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Swal from 'sweetalert2';
 import Header from 'src/components/Header';
 import CableMap from '../components/CableMap';
+import React, { useEffect, useState } from 'react';
 
 const legendItems = [
   { name: 'SJC', color: 'blue' },
@@ -26,6 +27,8 @@ function AdminDashboard() {
   const theme = useTheme();
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
 
   const handleClearData = async () => {
     const { isConfirmed } = await Swal.fire({
@@ -66,14 +69,81 @@ function AdminDashboard() {
       console.error('Clear error:', error);
     }
   };
-
+  // Open phpMyAdmin in a new tab
+  //window.open(
+  //  `${apiBaseUrl}/phpmyadmin/index.php?route=/table/import&db=cnfm_dashboard&table=utilization`,
+  //  '_blank'
+  //);
   const handleNewDataClick = () => {
-    // Open phpMyAdmin in a new tab
-    window.open(
-      `${apiBaseUrl}/phpmyadmin/index.php?route=/table/import&db=cnfm_dashboard&table=utilization`,
-      '_blank'
-    );
+    fileInputRef.current?.click(); // Trigger the hidden file input
   };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Ensure it's an xlsx file
+    if (!file.name.endsWith('.csv')) {
+      Swal.fire('Invalid file type', 'Only .csv files are allowed', 'error');
+      return;
+    }
+
+    // ✅ Handle the file upload here
+    console.log('Selected CSV file:', file);
+
+    // Example: Create FormData and upload to API
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch(`${apiBaseUrl}${port}/upload-csv`, {
+      method: 'POST',
+      body: formData
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        Swal.fire('Success', 'File uploaded successfully', 'success');
+        console.log(data);
+      })
+      .catch((err) => {
+        Swal.fire(
+          'Upload failed',
+          err.message || 'Something went wrong',
+          'error'
+        );
+        console.log(err);
+      });
+  };
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    const fetchLastUpdate = async () => {
+      try {
+        const response = await fetch(`${apiBaseUrl}${port}/latest-update`);
+        const data = await response.json();
+
+        if (data?.update?.date_time) {
+          const date = new Date(data.update.date_time);
+          setLastUpdate(date.toLocaleString());
+
+          // ✅ Stop interval after successful fetch
+          clearInterval(interval);
+        } else {
+          console.log('No update timestamp received, retrying...');
+        }
+      } catch (err) {
+        console.error('Error fetching latest update:', err);
+      }
+    };
+
+    // Run immediately on mount
+    fetchLastUpdate();
+
+    // Retry every 2s until we get the timestamp
+    interval = setInterval(fetchLastUpdate, 2000);
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [apiBaseUrl, port]);
 
   return (
     <>
@@ -135,7 +205,7 @@ function AdminDashboard() {
                       <Box sx={{ flexGrow: 1 }} />
                       <Box>
                         <Typography variant="body2">
-                          Last Updated: {new Date().toLocaleDateString()}
+                          Last Updated: {lastUpdate || 'No Updates Found'}
                         </Typography>
                       </Box>
                       {/* Clear Old Data Button */}
@@ -170,6 +240,13 @@ function AdminDashboard() {
                         >
                           {' New Data'}
                         </Button>
+                        <input
+                          type="file"
+                          accept=".csv"
+                          ref={fileInputRef}
+                          onChange={handleFileChange}
+                          style={{ display: 'none' }}
+                        />
                       </Box>
                     </Box>
                     {/* Map Container */}

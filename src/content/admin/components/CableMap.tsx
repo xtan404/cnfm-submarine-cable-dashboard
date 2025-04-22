@@ -164,15 +164,18 @@ const CableMap = () => {
         });
         const data = await response.json();
 
-        if (data?.current?.length && data?.previous?.length) {
+        if (data?.current?.length) {
           const currentVal = parseFloat(data.current[0].a_side);
-          const previousVal = parseFloat(data.previous[0].a_side);
-
           setIpopUtilization(`${currentVal}%`);
 
-          const diff = currentVal - previousVal;
-          const sign = diff > 0 ? '+' : '';
-          setIpopDifference(`${sign}${diff.toFixed(2)}%`);
+          if (data?.previous?.length) {
+            const previousVal = parseFloat(data.previous[0].a_side);
+            const diff = currentVal - previousVal;
+            const sign = diff > 0 ? '+' : '';
+            setIpopDifference(`${sign}${diff.toFixed(2)}%`);
+          } else {
+            setIpopDifference('');
+          }
 
           clearInterval(interval);
         } else {
