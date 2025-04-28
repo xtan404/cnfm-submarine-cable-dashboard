@@ -3,16 +3,16 @@ import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import SeaUS from '../dashboard/SeaUS';
-import SJC from '../dashboard/SJC';
-import C2C from '../dashboard/C2C';
-import TGNIA from '../dashboard/TGNIA';
-import JapanMarker from './JapanMarker';
-import HongkongMarker from './HongkongMarker';
-import SingaporeMarker from './SingaporeMarker';
-import USAMarker from './USAMarker';
-import SimulationButton from 'src/content/environment/components/SimulationButton';
-import RPLSeaUS from '../dashboard/RPLSeaUS';
+import USAMarker from 'src/content/admin/components/USAMarker';
+import JapanMarker from 'src/content/admin/components/JapanMarker';
+import TGNIA from 'src/content/admin/dashboard/TGNIA';
+import SJC from 'src/content/admin/dashboard/SJC';
+import HongkongMarker from 'src/content/admin/components/HongkongMarker';
+import SingaporeMarker from 'src/content/admin/components/SingaporeMarker';
+import C2C from 'src/content/admin/dashboard/C2C';
+import SeaUS from 'src/content/admin/dashboard/SeaUS';
+import ReturnButton from './ReturnButton';
+import RPLSeaUS from 'src/content/admin/dashboard/RPLSeaUS';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -72,7 +72,7 @@ function DynamicMarker({ position, label, icon }: DynamicMarkerProps) {
   return null;
 }
 
-const CableMap = () => {
+const SimulationMap = () => {
   const [mapHeight, setMapHeight] = useState('600px');
   const [ipopUtilization, setIpopUtilization] = useState('0%');
   const [ipopDifference, setIpopDifference] = useState('0%');
@@ -276,7 +276,7 @@ const CableMap = () => {
           label="Kauditan, Indonesia"
         />
         <DynamicMarker
-          position={[7.043883, 125.542033]}
+          position={[7.043717, 125.542204]}
           label="Davao, Philippines"
         />
         <DynamicMarker position={[13.4443, 144.7937]} label="Guam" />
@@ -296,15 +296,15 @@ const CableMap = () => {
         <JapanMarker />
         <HongkongMarker />
         <SingaporeMarker />
-        <SeaUS />
         <RPLSeaUS />
+        <SeaUS />
         <SJC />
         <C2C />
         <TGNIA />
-        <SimulationButton />
+        <ReturnButton />
       </MapContainer>
     </>
   );
 };
 
-export default CableMap;
+export default SimulationMap;

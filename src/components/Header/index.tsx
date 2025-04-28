@@ -32,7 +32,7 @@ const Header = () => {
   return (
     <Box
       textAlign="center"
-      py={2}
+      py={1}
       display="flex"
       flexDirection="row"
       alignItems="center"

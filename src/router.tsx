@@ -6,6 +6,7 @@ import BaseLayout from 'src/layouts/BaseLayout';
 
 import SuspenseLoader from 'src/components/SuspenseLoader';
 import PrivateRoute from 'src/components/PrivateRoute'; // Import the PrivateRoute component
+import SimulationEnvironment from './content/environment';
 
 const Loader = (Component) => (props) =>
   (
@@ -44,7 +45,8 @@ const routes: RouteObject[] = [
     element: <BaseLayout />,
     children: [
       { path: '/', element: <AdminDashboard /> },
-      { path: '/login', element: <RegisterPage /> },
+      { path: '/simulation', element: <SimulationEnvironment /> },
+      { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
       {
         path: 'status',
