@@ -215,10 +215,7 @@ function SeaUS() {
 
   // Updated Route: Davao → Kauditan (Indonesia) → Midpoint → Palau → Micronesia → Guam → Hawaii → Hermosa Beach
   const positions = [
-    [1.380184, 125.036215], // Kauditan, Indonesia
-    [2.619283, 126.861617], // BU Davao
-    [9.258624, 132.774064],
-    [13.4443, 144.7937], // Guam
+    [13.464717, 144.69305], // Guam
     [15.0, 160.0], // New intermediate point along the same trajectory
     [21.4671, 201.7798], // Makaha, Hawaii
     [33.8622, 241.6005] // Hermosa Beach

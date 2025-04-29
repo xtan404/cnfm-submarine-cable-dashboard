@@ -82,7 +82,7 @@ function DynamicMarker({
   return null;
 }
 
-function RPLSeaUS() {
+function RPLSeaUS2() {
   const theme = useTheme();
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
@@ -95,7 +95,7 @@ function RPLSeaUS() {
 
     const fetchPolylineData = async () => {
       try {
-        const response = await fetch(`${apiBaseUrl}${port}/sea-us-rpl`);
+        const response = await fetch(`${apiBaseUrl}${port}/sea-us-rpl-s2`);
         const result = await response.json();
 
         if (Array.isArray(result) && result.length > 0) {
@@ -124,7 +124,7 @@ function RPLSeaUS() {
     // Fetch marker data
     const fetchMarkerData = async () => {
       try {
-        const response = await fetch(`${apiBaseUrl}${port}/sea-us-rpl`);
+        const response = await fetch(`${apiBaseUrl}${port}/sea-us-rpl-s2`);
         const result = await response.json();
 
         if (Array.isArray(result) && result.length > 0) {
@@ -134,7 +134,7 @@ function RPLSeaUS() {
               (item: any) =>
                 item.event &&
                 typeof item.event === 'string' &&
-                (item.event.includes('S2R') || item.event.includes('BU'))
+                (item.event.includes('S2R') || item.event.includes('City'))
             )
             .map((item: any) => ({
               latitude: item.full_latitude,
@@ -187,4 +187,4 @@ function RPLSeaUS() {
   );
 }
 
-export default RPLSeaUS;
+export default RPLSeaUS2;

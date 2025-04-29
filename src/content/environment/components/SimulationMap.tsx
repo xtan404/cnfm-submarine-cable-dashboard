@@ -12,7 +12,10 @@ import SingaporeMarker from 'src/content/admin/components/SingaporeMarker';
 import C2C from 'src/content/admin/dashboard/C2C';
 import SeaUS from 'src/content/admin/dashboard/SeaUS';
 import ReturnButton from './ReturnButton';
-import RPLSeaUS from 'src/content/admin/dashboard/RPLSeaUS';
+import CutSeaUS from './WireCutRPL/CutSeaUS';
+import RPLSeaUS1 from 'src/content/admin/dashboard/RPLSeaUS1';
+import RPLSeaUS2 from 'src/content/admin/dashboard/RPLSeaUS2';
+import RPLSeaUS3 from 'src/content/admin/dashboard/RPLSeaUS3';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -276,10 +279,10 @@ const SimulationMap = () => {
           label="Kauditan, Indonesia"
         />
         <DynamicMarker
-          position={[7.043717, 125.542204]}
+          position={[7.043883, 125.542033]}
           label="Davao, Philippines"
         />
-        <DynamicMarker position={[13.4443, 144.7937]} label="Guam" />
+        <DynamicMarker position={[13.464717, 144.69305]} label="Piti, Guam" />
         <DynamicMarker
           position={[21.4671, 201.7798]}
           label="Makaha, Hawaii, USA"
@@ -296,12 +299,15 @@ const SimulationMap = () => {
         <JapanMarker />
         <HongkongMarker />
         <SingaporeMarker />
-        <RPLSeaUS />
+        <RPLSeaUS1 />
+        <RPLSeaUS2 />
+        <RPLSeaUS3 />
         <SeaUS />
         <SJC />
         <C2C />
         <TGNIA />
         <ReturnButton />
+        <CutSeaUS />
       </MapContainer>
     </>
   );

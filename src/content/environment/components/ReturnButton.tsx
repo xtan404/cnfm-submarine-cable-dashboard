@@ -2,7 +2,6 @@ import React from 'react';
 import { useMap } from 'react-leaflet';
 import { useEffect } from 'react';
 import L from 'leaflet';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'; // Or any other icon you prefer
 
 const ReturnButton = () => {
   const map = useMap();
@@ -63,6 +62,7 @@ const ReturnButton = () => {
 
         // Add click behavior
         button.onclick = function () {
+          localStorage.removeItem('seausCableCuts'); // Clear simulation data if needed
           window.location.href = '/'; // Change this to your target URL
         };
 

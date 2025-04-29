@@ -12,7 +12,9 @@ import HongkongMarker from './HongkongMarker';
 import SingaporeMarker from './SingaporeMarker';
 import USAMarker from './USAMarker';
 import SimulationButton from 'src/content/environment/components/SimulationButton';
-import RPLSeaUS from '../dashboard/RPLSeaUS';
+import RPLSeaUS1 from '../dashboard/RPLSeaUS1';
+import RPLSeaUS2 from '../dashboard/RPLSeaUS2';
+import RPLSeaUS3 from '../dashboard/RPLSeaUS3';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -272,14 +274,14 @@ const CableMap = () => {
         </Box>
         {/* Dynamic Hoverable Dot Markers*/}
         <DynamicMarker
-          position={[1.380184, 125.036215]}
+          position={[1.367833, 125.078783]}
           label="Kauditan, Indonesia"
         />
         <DynamicMarker
           position={[7.043883, 125.542033]}
           label="Davao, Philippines"
         />
-        <DynamicMarker position={[13.4443, 144.7937]} label="Guam" />
+        <DynamicMarker position={[13.464717, 144.69305]} label="Piti, Guam" />
         <DynamicMarker
           position={[21.4671, 201.7798]}
           label="Makaha, Hawaii, USA"
@@ -297,7 +299,9 @@ const CableMap = () => {
         <HongkongMarker />
         <SingaporeMarker />
         <SeaUS />
-        <RPLSeaUS />
+        <RPLSeaUS1 />
+        <RPLSeaUS2 />
+        <RPLSeaUS3 />
         <SJC />
         <C2C />
         <TGNIA />

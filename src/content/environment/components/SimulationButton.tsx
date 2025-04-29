@@ -2,7 +2,6 @@ import React from 'react';
 import { useMap } from 'react-leaflet';
 import { useEffect } from 'react';
 import L from 'leaflet';
-import PlayCircleOutlineIcon from '@mui/icons-material/PlayCircleOutline'; // Or any other icon you prefer
 
 const SimulationButton = () => {
   const map = useMap();
