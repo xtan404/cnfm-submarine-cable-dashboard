@@ -245,37 +245,125 @@ const CutSeaUS = () => {
       }).addTo(map);
 
       // Get depth info
-      const depth =
-        beforeCut && afterCut
-          ? `Approx. depth: ${beforeCut.approx_depth || 'Unknown'}m`
-          : beforeCut
-          ? `Approx. depth: ${beforeCut.approx_depth || 'Unknown'}m`
-          : afterCut
-          ? `Approx. depth: ${afterCut.approx_depth || 'Unknown'}m`
-          : 'Depth: Unknown';
+      const depth = beforeCut?.Depth || afterCut?.Depth || 'Unknown';
 
-      // Add popup with information
+      // Format timestamp for display
+      const timestamp = new Date(cut.timestamp).toLocaleString();
+
+      // Determine impact description based on cut type
+      let impactDescription = '';
+      switch (cut.cutType) {
+        case 'Shunt Fault':
+          impactDescription = 'Gradual degradation of service quality';
+          break;
+        case 'Partial Fiber Break':
+          impactDescription = 'Partial service disruption (50% capacity loss)';
+          break;
+        case 'Fiber Break':
+          impactDescription = 'Complete service disruption on affected fibers';
+          break;
+        case 'Full Cut':
+          impactDescription = 'Total cable failure, complete service outage';
+          break;
+        default:
+          impactDescription = 'Service impact unknown';
+      }
+
+      // Add popup with enhanced information
       const popupContent = `
-        <div style="text-align: center;">
-          <strong>${
-            cut.cutType.charAt(0).toUpperCase() + cut.cutType.slice(1)
-          } at ${cut.distance} km</strong>
-          ${
-            beforeCut
-              ? `<br>Between ${beforeCut.event} (${beforeCut.cable_cumulative_total} km)`
-              : ''
-          }
-          ${beforeCut && afterCut ? '<br>' : ''}
-          ${
-            afterCut
-              ? `and ${afterCut.event} (${afterCut.cable_cumulative_total} km)`
-              : ''
-          }<br>
-          ${depth}
+      <div class="cable-cut-popup" style="font-family: Arial, sans-serif; width: 250px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">
+        <div style="background-color: ${
+          markerStyle.color
+        }; color: white; padding: 8px; text-align: center; font-weight: bold; font-size: 14px; letter-spacing: 0.5px;">
+          ${cut.cutType.toUpperCase()}
         </div>
-      `;
+        
+        <div style="background-color: white; padding: 12px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <tr>
+              <td style="font-weight: bold; padding-bottom: 8px;">Distance:</td>
+              <td style="text-align: right; padding-bottom: 8px;">${cut.distance.toFixed(
+                3
+              )} km</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; padding-bottom: 8px;">Depth:</td>
+              <td style="text-align: right; padding-bottom: 8px;">${depth} m</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-weight: bold; padding-bottom: 4px;">Location:</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding-bottom: 8px; font-size: 12px; color: #444;">
+                ${
+                  beforeCut
+                    ? `From: ${beforeCut.event} (${beforeCut.cable_cumulative_total} km)`
+                    : ''
+                }
+                ${beforeCut && afterCut ? '<br>' : ''}
+                ${
+                  afterCut
+                    ? `To: ${afterCut.event} (${afterCut.cable_cumulative_total} km)`
+                    : ''
+                }
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-weight: bold; padding-bottom: 4px; color: #d32f2f;">Impact:</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-size: 12px; color: #d32f2f; padding-bottom: 8px;">${impactDescription}</td>
+            </tr>
+          </table>
+          <div style="font-size: 11px; color: #777; text-align: right; margin-top: 8px; font-style: italic;">
+            Reported: ${timestamp}
+          </div>
+        </div>
+      </div>
+    `;
 
-      cutMarkersRef.current[cut.id].bindPopup(popupContent);
+      // Add CSS for custom popup once if not already added
+      if (!document.getElementById('cable-cut-popup-styles')) {
+        const style = document.createElement('style');
+        style.id = 'cable-cut-popup-styles';
+        style.innerHTML = `
+        .cable-cut-custom-popup .leaflet-popup-content-wrapper {
+          padding: 0;
+          margin: 0;
+          background: none;
+          box-shadow: none;
+          border: none;
+        }
+        .cable-cut-custom-popup .leaflet-popup-content {
+          margin: 0;
+          padding: 0;
+          width: auto !important;
+          background: none;
+          box-shadow: none;
+        }
+        .cable-cut-custom-popup .leaflet-popup-tip-container,
+        .cable-cut-custom-popup .leaflet-popup-tip {
+          display: none;
+        }
+        .cable-cut-custom-popup .leaflet-popup-close-button {
+          display: none;
+        }
+        .cable-cut-custom-popup.leaflet-popup {
+          margin-bottom: 0;
+        }
+      `;
+        document.head.appendChild(style);
+      }
+
+      // Configure the popup with specific options to remove all default elements
+      cutMarkersRef.current[cut.id].bindPopup(popupContent, {
+        className: 'cable-cut-custom-popup',
+        maxWidth: 250,
+        minWidth: 250,
+        closeButton: false,
+        autoClose: false,
+        offset: [0, 0]
+      });
     }
   };
 
@@ -300,7 +388,7 @@ const CutSeaUS = () => {
         timestamp: new Date().toISOString(),
         latitude: cutPoint[0],
         longitude: cutPoint[1],
-        depth: beforeCut?.approx_depth || afterCut?.approx_depth || 'Unknown'
+        depth: beforeCut?.Depth || afterCut?.Depth || 'Unknown'
       };
 
       // Update the cuts state and localStorage
@@ -308,11 +396,88 @@ const CutSeaUS = () => {
       setCuts(updatedCuts);
       localStorage.setItem('seausCableCuts', JSON.stringify(updatedCuts));
 
-      // Display the cut on the map
+      // Immediately display the new marker
       displayCutOnMap(newCut);
-
       // Get marker style based on cut type
       const markerStyle = getMarkerStyle(cutType);
+
+      // Get depth info
+      const depth = beforeCut?.Depth || afterCut?.Depth || 'Unknown';
+
+      // Format timestamp for display
+      const timestamp = new Date(newCut.timestamp).toLocaleString();
+
+      // Determine impact description based on cut type
+      let impactDescription = '';
+      switch (cutType) {
+        case 'Shunt Fault':
+          impactDescription = 'Gradual degradation of service quality';
+          break;
+        case 'Partial Fiber Break':
+          impactDescription = 'Partial service disruption (50% capacity loss)';
+          break;
+        case 'Fiber Break':
+          impactDescription = 'Complete service disruption on affected fibers';
+          break;
+        case 'Full Cut':
+          impactDescription = 'Total cable failure, complete service outage';
+          break;
+        default:
+          impactDescription = 'Service impact unknown';
+      }
+
+      // Create the popup content with the same structure as in displayCutOnMap
+      const popupContent = `
+      <div class="cable-cut-popup" style="font-family: Arial, sans-serif; width: 250px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">
+        <div style="background-color: ${
+          markerStyle.color
+        }; color: white; padding: 8px; text-align: center; font-weight: bold; font-size: 14px; letter-spacing: 0.5px;">
+          ${cutType.toUpperCase()} DETECTED
+        </div>
+        
+        <div style="background-color: white; padding: 12px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+            <tr>
+              <td style="font-weight: bold; padding-bottom: 8px;">Distance:</td>
+              <td style="text-align: right; padding-bottom: 8px;">${Number(
+                kmValue
+              ).toFixed(3)} km</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; padding-bottom: 8px;">Depth:</td>
+              <td style="text-align: right; padding-bottom: 8px;">${depth} m</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-weight: bold; padding-bottom: 4px;">Location:</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding-bottom: 8px; font-size: 12px; color: #444;">
+                ${
+                  beforeCut
+                    ? `From: ${beforeCut.event} (${beforeCut.cable_cumulative_total} km)`
+                    : ''
+                }
+                ${beforeCut && afterCut ? '<br>' : ''}
+                ${
+                  afterCut
+                    ? `To: ${afterCut.event} (${afterCut.cable_cumulative_total} km)`
+                    : ''
+                }
+              </td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-weight: bold; padding-bottom: 4px; color: #d32f2f;">Impact:</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="font-size: 12px; color: #d32f2f; padding-bottom: 8px;">${impactDescription}</td>
+            </tr>
+          </table>
+          <div style="font-size: 11px; color: #777; text-align: right; margin-top: 8px; font-style: italic;">
+            Reported: ${timestamp}
+          </div>
+        </div>
+      </div>
+    `;
 
       // Create a new marker at the cut location
       cutMarkersRef.current[newCut.id] = L.marker(cutPoint, {
@@ -324,43 +489,55 @@ const CutSeaUS = () => {
         })
       }).addTo(map);
 
-      // Get depth info
-      const depth =
-        beforeCut && afterCut
-          ? `Approx. depth: ${beforeCut.approx_depth || 'Unknown'}m`
-          : beforeCut
-          ? `Approx. depth: ${beforeCut.approx_depth || 'Unknown'}m`
-          : afterCut
-          ? `Approx. depth: ${afterCut.approx_depth || 'Unknown'}m`
-          : 'Depth: Unknown';
-
-      // Add popup with information
-      const popupContent = `
-        <div style="text-align: center;">
-          <strong>${
-            cutType.charAt(0).toUpperCase() + cutType.slice(1)
-          } at ${kmValue} km</strong>
-          ${
-            beforeCut
-              ? `<br>Between ${beforeCut.event} (${beforeCut.cable_cumulative_total} km)`
-              : ''
-          }
-          ${beforeCut && afterCut ? '<br>' : ''}
-          ${
-            afterCut
-              ? `and ${afterCut.event} (${afterCut.cable_cumulative_total} km)`
-              : ''
-          }<br>
-          ${depth}
-        </div>
+      // Add CSS for custom popup once if not already added
+      if (!document.getElementById('cable-cut-popup-styles')) {
+        const style = document.createElement('style');
+        style.id = 'cable-cut-popup-styles';
+        style.innerHTML = `
+        .cable-cut-custom-popup .leaflet-popup-content-wrapper {
+          padding: 0;
+          margin: 0;
+          background: none;
+          box-shadow: none;
+          border: none;
+        }
+        .cable-cut-custom-popup .leaflet-popup-content {
+          margin: 0;
+          padding: 0;
+          width: auto !important;
+          background: none;
+          box-shadow: none;
+        }
+        .cable-cut-custom-popup .leaflet-popup-tip-container,
+        .cable-cut-custom-popup .leaflet-popup-tip {
+          display: none;
+        }
+        .cable-cut-custom-popup .leaflet-popup-close-button {
+          display: none;
+        }
+        .cable-cut-custom-popup.leaflet-popup {
+          margin-bottom: 0;
+        }
       `;
+        document.head.appendChild(style);
+      }
 
-      cutMarkersRef.current[newCut.id].bindPopup(popupContent).openPopup();
+      // Configure the popup with specific options
+      cutMarkersRef.current[newCut.id]
+        .bindPopup(popupContent, {
+          className: 'cable-cut-custom-popup',
+          maxWidth: 250,
+          minWidth: 250,
+          closeButton: false,
+          autoClose: false,
+          offset: [0, 0]
+        })
+        .openPopup();
 
       // Zoom to the cut point
       map.flyTo(cutPoint, 7.7, {
         animate: true,
-        duration: 1.4
+        duration: 0.5
       });
 
       console.log('Zoomed to cut point:', cutPoint);
@@ -376,7 +553,7 @@ const CutSeaUS = () => {
     if (cutMarkersRef.current[cut.id]) {
       map.flyTo([cut.latitude, cut.longitude], 7.5, {
         animate: true,
-        duration: 1.4
+        duration: 0.5
       });
       cutMarkersRef.current[cut.id].openPopup();
     }
