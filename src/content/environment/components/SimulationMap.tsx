@@ -12,10 +12,11 @@ import SingaporeMarker from 'src/content/admin/components/SingaporeMarker';
 import C2C from 'src/content/admin/dashboard/C2C';
 import SeaUS from 'src/content/admin/dashboard/SeaUS';
 import ReturnButton from './ReturnButton';
-import CutSeaUS from './WireCutRPL/CutSeaUS';
-import RPLSeaUS1 from 'src/content/admin/dashboard/RPLSeaUS1';
-import RPLSeaUS2 from 'src/content/admin/dashboard/RPLSeaUS2';
-import RPLSeaUS3 from 'src/content/admin/dashboard/RPLSeaUS3';
+import CutSeaUS from './RPLSeaUS/CutSeaUS';
+import RPLSeaUS1 from 'src/content/admin/dashboard/RoutePositionList/RPLSeaUS1';
+import RPLSeaUS2 from 'src/content/admin/dashboard/RoutePositionList/RPLSeaUS2';
+import RPLSeaUS3 from 'src/content/admin/dashboard/RoutePositionList/RPLSeaUS3';
+import CutSJC from './RPLSJC/CutSJC';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -275,7 +276,7 @@ const SimulationMap = () => {
         </Box>
         {/* Dynamic Hoverable Dot Markers*/}
         <DynamicMarker
-          position={[1.380184, 125.036215]}
+          position={[1.367833, 125.078783]}
           label="Kauditan, Indonesia"
         />
         <DynamicMarker
@@ -308,6 +309,7 @@ const SimulationMap = () => {
         <TGNIA />
         <ReturnButton />
         <CutSeaUS />
+        <CutSJC />
       </MapContainer>
     </>
   );

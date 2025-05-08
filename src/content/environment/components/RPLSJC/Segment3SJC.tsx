@@ -1,9 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ReactDOM from 'react-dom';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import ContentCutIcon from '@mui/icons-material/ContentCut';
-import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -11,35 +8,26 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
-import {
-  Typography,
-  Box,
-  Divider,
-  Card,
-  CardContent,
-  CardActions,
-  Chip
-} from '@mui/material';
+import { Typography, Box, Divider } from '@mui/material';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
 // Validation schema
 const validationSchema = Yup.object({
   kmValue: Yup.number()
     .required('Distance value is required')
-    .min(0.037, 'Distance out of bounds')
-    .max(553.462, 'Distance cannot exceed BU Davao City'),
+    .min(0, 'Distance out of bounds in Lay Interface')
+    .max(656.479, 'Distance cannot exceed Songkhla BU (BU2)'),
   cutType: Yup.string().required('Cut type selection is required')
 });
 
-const CutSeaUS = () => {
+const Segment3SJC = () => {
   const map = useMap();
-  const buttonContainerRef = useRef(null);
   const cutMarkersRef = useRef({});
   const [open, setOpen] = useState(false);
   const [cableData, setCableData] = useState([]);
@@ -54,7 +42,7 @@ const CutSeaUS = () => {
     const fetchCableData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${apiBaseUrl}${port}/sea-us-rpl-s2`);
+        const response = await fetch(`${apiBaseUrl}${port}/sjc-rpl-s3`);
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
         }
@@ -70,11 +58,11 @@ const CutSeaUS = () => {
     };
 
     fetchCableData();
-  }, []);
+  }, [apiBaseUrl, port]);
 
   // Load existing cuts from localStorage when component mounts
   useEffect(() => {
-    const storedCuts = localStorage.getItem('seausCableCuts');
+    const storedCuts = localStorage.getItem('sjcCableCuts');
     if (storedCuts) {
       const parsedCuts = JSON.parse(storedCuts);
       setCuts(parsedCuts);
@@ -84,7 +72,7 @@ const CutSeaUS = () => {
         displayCutOnMap(cut);
       });
     }
-  }, [map, cableData]); // We need cableData to properly place cuts
+  }, [map]); // We need cableData to properly place cuts
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -316,7 +304,7 @@ const CutSeaUS = () => {
             </tr>
           </table>
           <div style="font-size: 11px; color: #777; text-align: right; margin-top: 8px; font-style: italic;">
-            Reported: ${timestamp}
+            Simulated: ${timestamp}
           </div>
         </div>
       </div>
@@ -364,6 +352,8 @@ const CutSeaUS = () => {
         autoClose: false,
         offset: [0, 0]
       });
+      // Open the popup immediately
+      cutMarkersRef.current[cut.id].openPopup();
     }
   };
 
@@ -394,7 +384,7 @@ const CutSeaUS = () => {
       // Update the cuts state and localStorage
       const updatedCuts = [...cuts, newCut];
       setCuts(updatedCuts);
-      localStorage.setItem('seausCableCuts', JSON.stringify(updatedCuts));
+      localStorage.setItem('sjcCableCuts', JSON.stringify(updatedCuts));
 
       // Immediately display the new marker
       displayCutOnMap(newCut);
@@ -473,7 +463,7 @@ const CutSeaUS = () => {
             </tr>
           </table>
           <div style="font-size: 11px; color: #777; text-align: right; margin-top: 8px; font-style: italic;">
-            Reported: ${timestamp}
+            Simulated: ${timestamp}
           </div>
         </div>
       </div>
@@ -548,202 +538,118 @@ const CutSeaUS = () => {
     handleClose();
   };
 
-  // Function to focus on a specific cut
-  const handleFocusOnCut = (cut) => {
-    if (cutMarkersRef.current[cut.id]) {
-      map.flyTo([cut.latitude, cut.longitude], 7.5, {
-        animate: true,
-        duration: 0.5
-      });
-      cutMarkersRef.current[cut.id].openPopup();
-    }
-  };
-
-  useEffect(() => {
-    // Remove default attribution control
-    map.attributionControl.remove();
-
-    // Create custom control
-    const customControl = L.control({
-      position: 'bottomright'
-    });
-
-    // Create a div for React to render into
-    buttonContainerRef.current = L.DomUtil.create('div');
-
-    // Add the custom control to the map
-    customControl.onAdd = function () {
-      const container = L.DomUtil.create('div');
-      container.appendChild(buttonContainerRef.current);
-      return container;
-    };
-
-    customControl.addTo(map);
-
-    // Cleanup function
-    return () => {
-      map.removeControl(customControl);
-      Object.values(cutMarkersRef.current).forEach((marker) => {
-        map.removeLayer(marker);
-      });
-    };
-  }, [map, cuts.length]);
-
-  // Only render the button if the container ref is available
-  return buttonContainerRef.current
-    ? ReactDOM.createPortal(
-        <>
-          <Button
-            variant="contained"
-            sx={{
-              backgroundColor: '#2e7d32',
-              fontSize: '12px',
-              '&:hover': {
-                backgroundColor: '#1b5e20'
-              }
+  // Return the component content instead of using portals
+  return (
+    <>
+      <Box>
+        <Divider />
+        <DialogContent>
+          <Formik
+            initialValues={{
+              kmValue: '',
+              cutType: ''
             }}
-            startIcon={<ContentCutIcon />}
-            onClick={handleClickOpen}
+            validationSchema={validationSchema}
+            onSubmit={handleCut}
           >
-            Cut SEA-US Cable
-          </Button>
-
-          <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-            <DialogTitle>
-              <Typography variant="h5">Simulate Cable Cut</Typography>
-            </DialogTitle>
-            <DialogContent>
-              {loading ? (
-                <DialogContentText>Loading cable data...</DialogContentText>
-              ) : error ? (
-                <DialogContentText color="error">
-                  Error loading data: {error}
+            {({
+              values,
+              errors,
+              touched,
+              handleChange,
+              handleBlur,
+              isValid
+            }) => (
+              <Form>
+                <DialogContentText sx={{ mb: 1 }}>
+                  Enter the distance in kilometers where you want to simulate a
+                  cable cut:
                 </DialogContentText>
-              ) : (
-                <Formik
-                  initialValues={{
-                    kmValue: '',
-                    cutType: ''
+                <TextField
+                  margin="dense"
+                  id="kmValue"
+                  name="kmValue"
+                  label="Distance (km)"
+                  type="number"
+                  fullWidth
+                  variant="outlined"
+                  value={values.kmValue}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.kmValue && Boolean(errors.kmValue)}
+                  helperText={touched.kmValue && errors.kmValue}
+                  InputProps={{
+                    inputProps: {
+                      min: 0,
+                      max: 553.462,
+                      step: 0.001
+                    }
                   }}
-                  validationSchema={validationSchema}
-                  onSubmit={handleCut}
-                >
-                  {({
-                    values,
-                    errors,
-                    touched,
-                    handleChange,
-                    handleBlur,
-                    isValid
-                  }) => (
-                    <Form>
-                      <DialogContentText sx={{ mb: 1 }}>
-                        Enter the distance in kilometers where you want to
-                        simulate a cable cut:
-                      </DialogContentText>
-                      <TextField
-                        autoFocus
-                        margin="dense"
-                        id="kmValue"
-                        name="kmValue"
-                        label="Distance (km)"
-                        type="number"
-                        fullWidth
-                        variant="outlined"
-                        value={values.kmValue}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        error={touched.kmValue && Boolean(errors.kmValue)}
-                        helperText={touched.kmValue && errors.kmValue}
-                        InputProps={{
-                          inputProps: {
-                            min: 0,
-                            max: 553.462,
-                            step: 0.001
-                          }
-                        }}
+                />
+
+                <Divider sx={{ my: 2 }} />
+
+                <Box sx={{ mt: 0 }}>
+                  <FormControl
+                    component="fieldset"
+                    error={touched.cutType && Boolean(errors.cutType)}
+                  >
+                    <FormLabel component="legend">Select cut type:</FormLabel>
+                    <RadioGroup
+                      row
+                      aria-label="cut-type"
+                      name="cutType"
+                      value={values.cutType}
+                      onChange={handleChange}
+                    >
+                      <FormControlLabel
+                        value="Shunt Fault"
+                        control={<Radio />}
+                        label="Shunt Fault"
                       />
+                      <FormControlLabel
+                        value="Partial Fiber Break"
+                        control={<Radio />}
+                        label="Partial Fiber Break"
+                      />
+                      <FormControlLabel
+                        value="Fiber Break"
+                        control={<Radio />}
+                        label="Fiber Break"
+                      />
+                      <FormControlLabel
+                        value="Full Cut"
+                        control={<Radio />}
+                        label="Full Cut"
+                      />
+                    </RadioGroup>
+                    {touched.cutType && errors.cutType && (
+                      <Typography color="error" variant="caption">
+                        {errors.cutType}
+                      </Typography>
+                    )}
+                  </FormControl>
+                </Box>
 
-                      <Divider sx={{ my: 2 }} />
-
-                      <Box sx={{ mt: 2 }}>
-                        <FormControl
-                          component="fieldset"
-                          error={touched.cutType && Boolean(errors.cutType)}
-                        >
-                          <FormLabel component="legend">
-                            Select cut type:
-                          </FormLabel>
-                          <RadioGroup
-                            row
-                            aria-label="cut-type"
-                            name="cutType"
-                            value={values.cutType}
-                            onChange={handleChange}
-                          >
-                            <FormControlLabel
-                              value="Shunt Fault"
-                              control={<Radio />}
-                              label="Shunt Fault"
-                            />
-                            <FormControlLabel
-                              value="Partial Fiber Break"
-                              control={<Radio />}
-                              label="Partial Fiber Break"
-                            />
-                            <FormControlLabel
-                              value="Fiber Break"
-                              control={<Radio />}
-                              label="Fiber Break"
-                            />
-                            <FormControlLabel
-                              value="Full Cut"
-                              control={<Radio />}
-                              label="Full Cut"
-                            />
-                          </RadioGroup>
-                          {touched.cutType && errors.cutType && (
-                            <Typography color="error" variant="caption">
-                              {errors.cutType}
-                            </Typography>
-                          )}
-                        </FormControl>
-                      </Box>
-
-                      <Box sx={{ mt: 1 }}>
-                        <Typography variant="body2" color="text.secondary">
-                          {values.cutType === 'Shunt Fault' &&
-                            'Gradual damage from environmental friction. Progressive service degradation.'}
-                          {values.cutType === 'Partial Fiber Break' &&
-                            '50% damage to cable fibers. Partial service degradation.'}
-                          {values.cutType === 'Fiber Break' &&
-                            '100% damage to cable. Complete service loss.'}
-                          {values.cutType === 'Full Cut' &&
-                            'Damage from ship anchor. Service affected along dragged path.'}
-                        </Typography>
-                      </Box>
-
-                      <DialogActions>
-                        <Button onClick={handleClose}>Cancel</Button>
-                        <Button
-                          type="submit"
-                          variant="contained"
-                          color="primary"
-                          disabled={loading || !isValid}
-                        >
-                          Cut Cable
-                        </Button>
-                      </DialogActions>
-                    </Form>
-                  )}
-                </Formik>
-              )}
-            </DialogContent>
-          </Dialog>
-        </>,
-        buttonContainerRef.current
-      )
-    : null;
+                <Box sx={{ mt: 0 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {values.cutType === 'Shunt Fault' &&
+                      'Gradual damage from environmental friction. Progressive service degradation.'}
+                    {values.cutType === 'Partial Fiber Break' &&
+                      '50% damage to cable fibers. Partial service degradation.'}
+                    {values.cutType === 'Fiber Break' &&
+                      '100% damage to cable. Complete service loss.'}
+                    {values.cutType === 'Full Cut' &&
+                      'Damage from ship anchor. Service affected along dragged path.'}
+                  </Typography>
+                </Box>
+              </Form>
+            )}
+          </Formik>
+        </DialogContent>
+      </Box>
+    </>
+  );
 };
 
-export default CutSeaUS;
+export default Segment3SJC;

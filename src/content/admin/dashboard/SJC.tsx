@@ -239,29 +239,8 @@ function SJC() {
 
   return (
     <>
-      <Polyline
-        positions={positions}
-        pathOptions={{
-          color: stats.avgUtilization > 0 ? 'blue' : 'red',
-          weight: 4
-        }}
-        eventHandlers={{
-          click: handleOpen // Open modal on click
-        }}
-      />
-      {/* Hong Kong to Nasugbu Route (Intersecting West Philippine Sea) */}
-      <Polyline
-        positions={hongKongToNasugbu}
-        pathOptions={{
-          color: stats.avgUtilization > 0 ? 'blue' : 'red',
-          weight: 4
-        }}
-        eventHandlers={{
-          click: handleOpen // Open modal on click
-        }}
-      />
       <DynamicMarker
-        position={[7.5, 111.0]}
+        position={[7.4465, 111.1488]}
         label={`Total Capacity: <strong>${stats.totalGbps} Gbps</strong><br>Average Utilization: <strong>${stats.avgUtilization}%</strong>`}
         count={zeroCount}
         onClick={handleOpen}

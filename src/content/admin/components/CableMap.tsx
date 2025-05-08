@@ -12,9 +12,21 @@ import HongkongMarker from './HongkongMarker';
 import SingaporeMarker from './SingaporeMarker';
 import USAMarker from './USAMarker';
 import SimulationButton from 'src/content/environment/components/SimulationButton';
-import RPLSeaUS1 from '../dashboard/RPLSeaUS1';
-import RPLSeaUS2 from '../dashboard/RPLSeaUS2';
-import RPLSeaUS3 from '../dashboard/RPLSeaUS3';
+import RPLSeaUS1 from '../dashboard/RoutePositionList/RPLSeaUS1';
+import RPLSeaUS2 from '../dashboard/RoutePositionList/RPLSeaUS2';
+import RPLSeaUS3 from '../dashboard/RoutePositionList/RPLSeaUS3';
+import RPLSJC1 from '../dashboard/RoutePositionList/RPLSJC1';
+import RPLSJC3 from '../dashboard/RoutePositionList/RPLSJC3';
+import RPLSJC4 from '../dashboard/RoutePositionList/RPLSJC4';
+import RPLSJC5 from '../dashboard/RoutePositionList/RPLSJC5';
+import RPLSJC6 from '../dashboard/RoutePositionList/RPLSJC6';
+import RPLSJC7 from '../dashboard/RoutePositionList/RPLSJC7';
+import RPLSJC8 from '../dashboard/RoutePositionList/RPLSJC8';
+import RPLSJC9 from '../dashboard/RoutePositionList/RPLSJC9';
+import RPLSJC10 from '../dashboard/RoutePositionList/RPLSJC10';
+import RPLSJC11 from '../dashboard/RoutePositionList/RPLSJC11';
+import RPLSJC12 from '../dashboard/RoutePositionList/RPLSJC12';
+import RPLSJC13 from '../dashboard/RoutePositionList/RPLSJC13';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -302,6 +314,18 @@ const CableMap = () => {
         <RPLSeaUS1 />
         <RPLSeaUS2 />
         <RPLSeaUS3 />
+        <RPLSJC1 />
+        <RPLSJC3 />
+        <RPLSJC4 />
+        <RPLSJC5 />
+        <RPLSJC6 />
+        <RPLSJC7 />
+        <RPLSJC8 />
+        <RPLSJC9 />
+        <RPLSJC10 />
+        <RPLSJC11 />
+        <RPLSJC12 />
+        <RPLSJC13 />
         <SJC />
         <C2C />
         <TGNIA />
