@@ -21,7 +21,7 @@ import * as Yup from 'yup';
 const validationSchema = Yup.object({
   kmValue: Yup.number()
     .required('Distance value is required')
-    .min(0.595, 'Distance out of bounds: LP: Shantou')
+    .min(0.595, 'Distance out of bounds (LP: Shantou)')
     .max(586.313, 'Distance cannot exceed Shantou BU (BU6)'),
   cutType: Yup.string().required('Cut type selection is required')
 });

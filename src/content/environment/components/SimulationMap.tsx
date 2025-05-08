@@ -17,6 +17,18 @@ import RPLSeaUS1 from 'src/content/admin/dashboard/RoutePositionList/RPLSeaUS1';
 import RPLSeaUS2 from 'src/content/admin/dashboard/RoutePositionList/RPLSeaUS2';
 import RPLSeaUS3 from 'src/content/admin/dashboard/RoutePositionList/RPLSeaUS3';
 import CutSJC from './RPLSJC/CutSJC';
+import RPLSJC1 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC1';
+import RPLSJC3 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC3';
+import RPLSJC4 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC4';
+import RPLSJC5 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC5';
+import RPLSJC6 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC6';
+import RPLSJC7 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC7';
+import RPLSJC8 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC8';
+import RPLSJC9 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC9';
+import RPLSJC10 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC10';
+import RPLSJC11 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC11';
+import RPLSJC12 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC12';
+import RPLSJC13 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC13';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -303,6 +315,18 @@ const SimulationMap = () => {
         <RPLSeaUS1 />
         <RPLSeaUS2 />
         <RPLSeaUS3 />
+        <RPLSJC1 />
+        <RPLSJC3 />
+        <RPLSJC4 />
+        <RPLSJC5 />
+        <RPLSJC6 />
+        <RPLSJC7 />
+        <RPLSJC8 />
+        <RPLSJC9 />
+        <RPLSJC10 />
+        <RPLSJC11 />
+        <RPLSJC12 />
+        <RPLSJC13 />
         <SeaUS />
         <SJC />
         <C2C />

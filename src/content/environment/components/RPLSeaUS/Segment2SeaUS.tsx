@@ -17,6 +17,11 @@ import FormLabel from '@mui/material/FormLabel';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
+// Define prop types for TypeScript
+interface Segment2SeaUSProps {
+  handleClose?: () => void; // Make it optional to maintain backward compatibility
+}
+
 // Validation schema
 const validationSchema = Yup.object({
   kmValue: Yup.number()
@@ -26,7 +31,9 @@ const validationSchema = Yup.object({
   cutType: Yup.string().required('Cut type selection is required')
 });
 
-const Segment2SeaUS = () => {
+const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
+  handleClose: externalHandleClose
+}) => {
   const map = useMap();
   const cutMarkersRef = useRef({});
   const [open, setOpen] = useState(false);
@@ -74,12 +81,13 @@ const Segment2SeaUS = () => {
     }
   }, [map]); // We need cableData to properly place cuts
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
+  // Enhanced handleClose that calls both local and parent close functions
   const handleClose = () => {
     setOpen(false);
+    // If external handleClose is provided, call it as well
+    if (externalHandleClose) {
+      externalHandleClose();
+    }
   };
 
   // Function to find cable segments based on cut distance
@@ -535,7 +543,7 @@ const Segment2SeaUS = () => {
       console.error('Could not calculate cut point');
     }
 
-    handleClose();
+    externalHandleClose();
   };
 
   // Return the component content instead of using portals
@@ -578,13 +586,6 @@ const Segment2SeaUS = () => {
                   onBlur={handleBlur}
                   error={touched.kmValue && Boolean(errors.kmValue)}
                   helperText={touched.kmValue && errors.kmValue}
-                  InputProps={{
-                    inputProps: {
-                      min: 0,
-                      max: 553.462,
-                      step: 0.001
-                    }
-                  }}
                 />
 
                 <Divider sx={{ my: 2 }} />
@@ -643,6 +644,19 @@ const Segment2SeaUS = () => {
                       'Damage from ship anchor. Service affected along dragged path.'}
                   </Typography>
                 </Box>
+                <DialogActions>
+                  <Button onClick={() => externalHandleClose()} color="primary">
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={!isValid}
+                  >
+                    Cut Cable
+                  </Button>
+                </DialogActions>
               </Form>
             )}
           </Formik>

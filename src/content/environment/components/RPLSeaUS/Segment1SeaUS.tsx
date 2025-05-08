@@ -1,14 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 import TextField from '@mui/material/TextField';
-import { Typography, Box, Divider } from '@mui/material';
+import { Typography, Box, Divider, DialogActions, Button } from '@mui/material';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -16,6 +12,11 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+
+// Define prop types for TypeScript
+interface Segment1SeaUSProps {
+  handleClose?: () => void; // Make it optional to maintain backward compatibility
+}
 
 // Validation schema
 const validationSchema = Yup.object({
@@ -26,13 +27,13 @@ const validationSchema = Yup.object({
   cutType: Yup.string().required('Cut type selection is required')
 });
 
-const Segment1SeaUS = () => {
+const Segment1SeaUS: React.FC<Segment1SeaUSProps> = ({
+  handleClose: externalHandleClose
+}) => {
   const map = useMap();
   const cutMarkersRef = useRef({});
   const [open, setOpen] = useState(false);
   const [cableData, setCableData] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [cuts, setCuts] = useState([]);
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
@@ -41,45 +42,50 @@ const Segment1SeaUS = () => {
   useEffect(() => {
     const fetchCableData = async () => {
       try {
-        setLoading(true);
-        const response = await fetch(`${apiBaseUrl}${port}/sea-us-rpl-s2`);
+        const response = await fetch(`${apiBaseUrl}${port}/sea-us-rpl-s1`);
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
         }
         const data = await response.json();
         setCableData(data);
-        setError(null);
       } catch (err) {
         console.error('Error fetching cable data:', err);
-        setError(err.message);
       } finally {
-        setLoading(false);
       }
     };
 
     fetchCableData();
   }, [apiBaseUrl, port]);
 
-  // Load existing cuts from localStorage when component mounts
   useEffect(() => {
-    const storedCuts = localStorage.getItem('seausCableCuts');
-    if (storedCuts) {
-      const parsedCuts = JSON.parse(storedCuts);
-      setCuts(parsedCuts);
+    // Only attempt to load and display cuts if cableData is available
+    if (cableData && cableData.length > 0) {
+      const storedCuts = localStorage.getItem('seausCableCuts');
+      if (storedCuts) {
+        try {
+          const parsedCuts = JSON.parse(storedCuts);
+          setCuts(parsedCuts);
 
-      // Display all stored cuts on the map
-      parsedCuts.forEach((cut) => {
-        displayCutOnMap(cut);
-      });
+          // Display all stored cuts on the map
+          parsedCuts.forEach((cut) => {
+            displayCutOnMap(cut);
+          });
+        } catch (error) {
+          console.error('Error parsing stored cuts:', error);
+          // If there's an error parsing, clear the corrupted data
+          localStorage.removeItem('seausCableCuts');
+        }
+      }
     }
-  }, [map]); // We need cableData to properly place cuts
+  }, [map, cableData]); // Include cableData as a dependency
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
+  // Enhanced handleClose that calls both local and parent close functions
   const handleClose = () => {
     setOpen(false);
+    // If external handleClose is provided, call it as well
+    if (externalHandleClose) {
+      externalHandleClose();
+    }
   };
 
   // Function to find cable segments based on cut distance
@@ -535,7 +541,7 @@ const Segment1SeaUS = () => {
       console.error('Could not calculate cut point');
     }
 
-    handleClose();
+    externalHandleClose();
   };
 
   // Return the component content instead of using portals
@@ -578,13 +584,6 @@ const Segment1SeaUS = () => {
                   onBlur={handleBlur}
                   error={touched.kmValue && Boolean(errors.kmValue)}
                   helperText={touched.kmValue && errors.kmValue}
-                  InputProps={{
-                    inputProps: {
-                      min: 0,
-                      max: 553.462,
-                      step: 0.001
-                    }
-                  }}
                 />
 
                 <Divider sx={{ my: 2 }} />
@@ -643,6 +642,19 @@ const Segment1SeaUS = () => {
                       'Damage from ship anchor. Service affected along dragged path.'}
                   </Typography>
                 </Box>
+                <DialogActions>
+                  <Button onClick={() => externalHandleClose()} color="primary">
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={!isValid}
+                  >
+                    Cut Cable
+                  </Button>
+                </DialogActions>
               </Form>
             )}
           </Formik>

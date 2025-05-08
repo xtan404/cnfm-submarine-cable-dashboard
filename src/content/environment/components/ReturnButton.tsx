@@ -10,6 +10,13 @@ const ReturnButton = () => {
     // Remove default attribution control
     map.attributionControl.remove();
 
+    // Add event listener to clear localStorage on page refresh/close
+    const handleBeforeUnload = () => {
+      localStorage.removeItem('seausCableCuts');
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
     // Create custom control
     const customControl = L.control({
       position: 'bottomright'
@@ -62,7 +69,7 @@ const ReturnButton = () => {
 
         // Add click behavior
         button.onclick = function () {
-          localStorage.removeItem('seausCableCuts'); // Clear simulation data if needed
+          localStorage.removeItem('seausCableCuts'); // Clear simulation data
           window.location.href = '/'; // Change this to your target URL
         };
 
@@ -76,7 +83,9 @@ const ReturnButton = () => {
 
     customControl.addTo(map);
 
+    // Cleanup function to remove event listener and control
     return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
       map.removeControl(customControl);
     };
   }, [map]);
