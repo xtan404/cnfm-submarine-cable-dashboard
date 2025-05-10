@@ -17,6 +17,11 @@ import FormLabel from '@mui/material/FormLabel';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
+// Define prop types for TypeScript
+interface Segment13SJCProps {
+  handleClose?: () => void; // Make it optional to maintain backward compatibility
+}
+
 // Validation schema
 const validationSchema = Yup.object({
   kmValue: Yup.number()
@@ -26,7 +31,9 @@ const validationSchema = Yup.object({
   cutType: Yup.string().required('Cut type selection is required')
 });
 
-const Segment13SJC = () => {
+const Segment13SJC: React.FC<Segment13SJCProps> = ({
+  handleClose: externalHandleClose
+}) => {
   const map = useMap();
   const cutMarkersRef = useRef({});
   const [open, setOpen] = useState(false);
@@ -74,12 +81,13 @@ const Segment13SJC = () => {
     }
   }, [map]); // We need cableData to properly place cuts
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
+  // Enhanced handleClose that calls both local and parent close functions
   const handleClose = () => {
     setOpen(false);
+    // If external handleClose is provided, call it as well
+    if (externalHandleClose) {
+      externalHandleClose();
+    }
   };
 
   // Function to find cable segments based on cut distance
@@ -535,7 +543,7 @@ const Segment13SJC = () => {
       console.error('Could not calculate cut point');
     }
 
-    handleClose();
+    externalHandleClose();
   };
 
   // Return the component content instead of using portals

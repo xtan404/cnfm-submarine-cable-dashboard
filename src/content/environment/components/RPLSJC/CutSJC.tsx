@@ -3,22 +3,14 @@ import ReactDOM from 'react-dom';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import ContentCutIcon from '@mui/icons-material/ContentCut';
-import DeleteIcon from '@mui/icons-material/Delete';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import TextField from '@mui/material/TextField';
 import {
   Typography,
   Box,
   Divider,
-  Card,
   CardContent,
-  CardActions,
-  Chip,
   Tab,
   Tabs
 } from '@mui/material';
@@ -39,6 +31,10 @@ interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
+}
+
+interface CutSJCProps {
+  handleClose?: () => void;
 }
 
 function TabPanel(props: TabPanelProps) {
@@ -68,12 +64,11 @@ function a11yProps(index: number) {
   };
 }
 
-const CutSJC = () => {
+const CutSJC: React.FC<CutSJCProps> = ({ handleClose }) => {
   const map = useMap();
-  const buttonContainerRef = useRef(null);
-  const cutMarkersRef = useRef({});
+  const buttonContainerRef = useRef<HTMLDivElement | null>(null);
+  const cutMarkersRef = useRef<Record<string, L.Marker>>({});
   const [open, setOpen] = useState(false);
-  const [cableData, setCableData] = useState([]);
   const [value, setValue] = useState(0);
 
   useEffect(() => {
@@ -112,7 +107,14 @@ const CutSJC = () => {
 
   // Handle Dialog Open/Close
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+
+  // Update local handleDialogClose to manage both the local state and call the parent's handleClose if provided
+  const handleDialogClose = () => {
+    setOpen(false);
+    if (handleClose) {
+      handleClose();
+    }
+  };
 
   // Only render the button if the container ref is available
   return buttonContainerRef.current
@@ -134,7 +136,12 @@ const CutSJC = () => {
           </Button>
 
           {/* Modal Dialog */}
-          <Dialog open={open} onClose={handleClose} maxWidth="xl" fullWidth>
+          <Dialog
+            open={open}
+            onClose={handleDialogClose}
+            maxWidth="xl"
+            fullWidth
+          >
             <DialogTitle>
               <Typography variant="h5">Simulate SJC Cable Cut</Typography>
             </DialogTitle>
@@ -165,49 +172,43 @@ const CutSJC = () => {
                 </Tabs>
                 {/* Tab Content */}
                 <TabPanel value={value} index={0}>
-                  <Segment1SJC />
+                  <Segment1SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                  <Segment3SJC />
+                  <Segment3SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={2}>
-                  <Segment4SJC />
+                  <Segment4SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={3}>
-                  <Segment5SJC />
+                  <Segment5SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={4}>
-                  <Segment6SJC />
+                  <Segment6SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={5}>
-                  <Segment7SJC />
+                  <Segment7SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={6}>
-                  <Segment8SJC />
+                  <Segment8SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={7}>
-                  <Segment9SJC />
+                  <Segment9SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={8}>
-                  <Segment10SJC />
+                  <Segment10SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={9}>
-                  <Segment11SJC />
+                  <Segment11SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={10}>
-                  <Segment12SJC />
+                  <Segment12SJC handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={11}>
-                  <Segment13SJC />
+                  <Segment13SJC handleClose={handleDialogClose} />
                 </TabPanel>
               </Box>
             </CardContent>
-            <DialogActions>
-              <Button onClick={handleClose}>Cancel</Button>
-              <Button type="submit" variant="contained" color="primary">
-                Cut Cable
-              </Button>
-            </DialogActions>
           </Dialog>
         </>,
         buttonContainerRef.current
