@@ -140,6 +140,7 @@ interface C2CCable {
 function C2C() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
+  const [defineCableOpen, setDefineCableOpen] = useState(false);
   const [value, setValue] = useState(0);
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
@@ -237,6 +238,8 @@ function C2C() {
   // Handle Dialog Open/Close
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const handleOpenDefine = () => setDefineCableOpen(true);
+  const handleCloseDefine = () => setDefineCableOpen(false);
 
   return (
     <>
@@ -248,7 +251,7 @@ function C2C() {
           weight: 4
         }}
         eventHandlers={{
-          click: handleOpen // Open modal on click
+          click: handleOpenDefine // Open modal on click
         }}
       />
       {/* Hong Kong to Nasugbu Route (Intersecting West Philippine Sea) */}
@@ -257,6 +260,9 @@ function C2C() {
         pathOptions={{
           color: stats.avgUtilization > 0 ? 'orange' : 'red',
           weight: 4
+        }}
+        eventHandlers={{
+          click: handleOpenDefine // Open modal on click
         }}
       />
       <DynamicMarker
@@ -302,6 +308,111 @@ function C2C() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Define Cable Modal Dialog */}
+      <Dialog
+        open={defineCableOpen}
+        onClose={handleCloseDefine}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h5">C2C Submarine Cable Details</Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <CardContent>
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Ready For Service
+              </Typography>
+              <Typography variant="body1" color="primary" paragraph>
+                2002 November
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Cable Length
+              </Typography>
+              <Typography variant="body1" paragraph>
+                36,500 km
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Owners
+              </Typography>
+              <Typography variant="body1" paragraph>
+                Telstra
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Suppliers
+              </Typography>
+              <Typography variant="body1" color="primary" paragraph>
+                ASN, KDD-SCS, SubCom
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Landing Points
+              </Typography>
+              <Box component="ul" sx={{ pl: 2 }}>
+                <Typography component="li" variant="body1" color="primary">
+                  Chung Hom Kok, China
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Nanhui, China
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Qingdao, China
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Tseung Kwan O, China
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Ajigaura, Japan
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Chikura, Japan
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Shima, Japan
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Batangas, Philippines
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Cavite, Philippines
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Changi North, Singapore
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Changi South, Singapore
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Busan, South Korea
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Shindu-Ri, South Korea
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Fangshan, Taiwan
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Pa Li, Taiwan
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Tanshui, Taiwan
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDefine} color="primary">
             Close
           </Button>
         </DialogActions>

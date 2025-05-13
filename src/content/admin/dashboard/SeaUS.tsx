@@ -139,6 +139,7 @@ function a11yProps(index: number) {
 function SeaUS() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
+  const [defineCableOpen, setDefineCableOpen] = useState(false);
   const [value, setValue] = useState(0);
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
@@ -224,6 +225,8 @@ function SeaUS() {
   // Handle Dialog Open/Close
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const handleOpenDefine = () => setDefineCableOpen(true);
+  const handleCloseDefine = () => setDefineCableOpen(false);
 
   return (
     <>
@@ -235,7 +238,7 @@ function SeaUS() {
           weight: 4
         }}
         eventHandlers={{
-          click: handleOpen // Open modal on click
+          click: handleOpenDefine // Open modal on click
         }}
       />
       <DynamicMarker
@@ -277,6 +280,85 @@ function SeaUS() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Define Cable Modal Dialog */}
+      <Dialog
+        open={defineCableOpen}
+        onClose={handleCloseDefine}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h5">SEA-US Submarine Cable Details</Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <CardContent>
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Ready For Service
+              </Typography>
+              <Typography variant="body1" color="primary" paragraph>
+                2017 August
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Cable Length
+              </Typography>
+              <Typography variant="body1" paragraph>
+                14,500 km
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Owners
+              </Typography>
+              <Typography variant="body1" paragraph>
+                GTA TeleGuam, Globe Telecom, Hawaiian Telcom, Lightstorm
+                Telecom, Telin
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Suppliers
+              </Typography>
+              <Typography variant="body1" color="primary" paragraph>
+                NEC
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Landing Points
+              </Typography>
+              <Box component="ul" sx={{ pl: 2 }}>
+                <Typography component="li" variant="body1" color="primary">
+                  Piti, Guam
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Kauditan, Indonesia
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Magachgil, Yap, Micronesia
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Ngeremlengui, Palau
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Davao, Philippines
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Hermosa Beach, CA, United States
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Makaha, Hawaii, United States
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDefine} color="primary">
             Close
           </Button>
         </DialogActions>

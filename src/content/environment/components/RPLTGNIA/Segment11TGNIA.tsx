@@ -18,7 +18,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
 // Define prop types for TypeScript
-interface Segment3SJCProps {
+interface Segment11TGNIAProps {
   handleClose?: () => void; // Make it optional to maintain backward compatibility
 }
 
@@ -26,12 +26,12 @@ interface Segment3SJCProps {
 const validationSchema = Yup.object({
   kmValue: Yup.number()
     .required('Distance value is required')
-    .min(0, 'Distance out of bounds in Lay Interface')
-    .max(656.479, 'Distance cannot exceed Songkhla BU (BU2)'),
+    .min(0, 'Distance out of bounds (Beach Manhole)')
+    .max(29.983, 'Distance cannot exceed Branching Unit'),
   cutType: Yup.string().required('Cut type selection is required')
 });
 
-const Segment3SJC: React.FC<Segment3SJCProps> = ({
+const Segment11TGNIA: React.FC<Segment11TGNIAProps> = ({
   handleClose: externalHandleClose
 }) => {
   const map = useMap();
@@ -49,7 +49,7 @@ const Segment3SJC: React.FC<Segment3SJCProps> = ({
     const fetchCableData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${apiBaseUrl}${port}/sjc-rpl-s3`);
+        const response = await fetch(`${apiBaseUrl}${port}/tgnia-rpl-s11`);
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
         }
@@ -69,7 +69,7 @@ const Segment3SJC: React.FC<Segment3SJCProps> = ({
 
   // Load existing cuts from localStorage when component mounts
   useEffect(() => {
-    const storedCuts = localStorage.getItem('sjcCableCuts');
+    const storedCuts = localStorage.getItem('tgniaCableCuts');
     if (storedCuts) {
       const parsedCuts = JSON.parse(storedCuts);
       setCuts(parsedCuts);
@@ -392,7 +392,7 @@ const Segment3SJC: React.FC<Segment3SJCProps> = ({
       // Update the cuts state and localStorage
       const updatedCuts = [...cuts, newCut];
       setCuts(updatedCuts);
-      localStorage.setItem('sjcCableCuts', JSON.stringify(updatedCuts));
+      localStorage.setItem('tgniaCableCuts', JSON.stringify(updatedCuts));
 
       // Immediately display the new marker
       displayCutOnMap(newCut);
@@ -673,4 +673,4 @@ const Segment3SJC: React.FC<Segment3SJCProps> = ({
   );
 };
 
-export default Segment3SJC;
+export default Segment11TGNIA;

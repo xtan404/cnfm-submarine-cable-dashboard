@@ -93,7 +93,7 @@ function DynamicMarker({
   return null;
 }
 
-function RPLSJC5() {
+function RPLTGNIA10() {
   const theme = useTheme();
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
@@ -107,24 +107,40 @@ function RPLSJC5() {
 
     const fetchPolylineData = async () => {
       try {
-        const response = await fetch(`${apiBaseUrl}${port}/sjc-rpl-s5`);
+        const response = await fetch(`${apiBaseUrl}${port}/tgnia-rpl-s10`);
         const result = await response.json();
 
         if (Array.isArray(result) && result.length > 0) {
           // Build positions for the polyline based on full_latitude and full_longitude
+          // But handle them as strings and convert to numbers
           const mappedPositions = result
             .filter(
               (item: any) =>
-                typeof item.full_latitude === 'number' &&
-                typeof item.full_longitude === 'number'
+                item.full_latitude &&
+                item.full_longitude &&
+                item.full_latitude !== '0' &&
+                item.full_longitude !== '0'
             )
             .map(
               (item: any) =>
-                [item.full_latitude, item.full_longitude] as [number, number]
+                [
+                  parseFloat(item.full_latitude),
+                  parseFloat(item.full_longitude)
+                ] as [number, number]
+            )
+            // Filter out any invalid coordinates after parsing
+            .filter(
+              (coords: [number, number]) =>
+                !isNaN(coords[0]) && !isNaN(coords[1])
             );
 
           setPositions(mappedPositions);
-          clearInterval(interval);
+
+          if (mappedPositions.length > 0) {
+            clearInterval(interval);
+          } else {
+            console.log('No valid coordinates found in the data');
+          }
         } else {
           console.log('No polyline data received, retrying...');
         }
@@ -136,11 +152,11 @@ function RPLSJC5() {
     // Fetch marker data
     const fetchMarkerData = async () => {
       try {
-        const response = await fetch(`${apiBaseUrl}${port}/sjc-rpl-s5`);
+        const response = await fetch(`${apiBaseUrl}${port}/tgnia-rpl-s10`);
         const result = await response.json();
 
         if (Array.isArray(result) && result.length > 0) {
-          // Process marker data - filter for events containing "S1R"
+          // Process marker data - filter for events containing "BMH" or "BU"
           const markerData = result
             .filter(
               (item: any) =>
@@ -149,10 +165,15 @@ function RPLSJC5() {
                 (item.event.includes('BMH') || item.event.includes('BU'))
             )
             .map((item: any) => ({
-              latitude: item.full_latitude,
-              longitude: item.full_longitude,
+              latitude: parseFloat(item.full_latitude),
+              longitude: parseFloat(item.full_longitude),
               label: item.event
-            }));
+            }))
+            // Filter out any markers with invalid coordinates
+            .filter(
+              (marker: any) =>
+                !isNaN(marker.latitude) && !isNaN(marker.longitude)
+            );
 
           setMarkers(markerData);
         } else {
@@ -184,7 +205,7 @@ function RPLSJC5() {
       <Polyline
         positions={positions}
         pathOptions={{
-          color: 'blue',
+          color: 'yellow',
           weight: 4
         }}
         eventHandlers={{
@@ -209,7 +230,7 @@ function RPLSJC5() {
         fullWidth
       >
         <DialogTitle>
-          <Typography variant="h5">SJC Submarine Cable Details</Typography>
+          <Typography variant="h5">TGN-IA Submarine Cable Details</Typography>
         </DialogTitle>
         <Divider />
         <DialogContent>
@@ -219,30 +240,28 @@ function RPLSJC5() {
                 Ready For Service
               </Typography>
               <Typography variant="body1" color="primary" paragraph>
-                2013 June
+                2009 March
               </Typography>
 
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                 Cable Length
               </Typography>
               <Typography variant="body1" paragraph>
-                8,900 km
+                6,700 km
               </Typography>
 
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                 Owners
               </Typography>
               <Typography variant="body1" paragraph>
-                China Mobile, China Telecom, Chunghwa Telecom, Globe Telecom,
-                Google, KDDI, National Telecom, Singtel, Telkom Indonesia,
-                Unified National Networks (UNN)
+                Tata Communications
               </Typography>
 
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                 Suppliers
               </Typography>
               <Typography variant="body1" color="primary" paragraph>
-                NEC, SubCom
+                SubCom
               </Typography>
 
               <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
@@ -250,22 +269,16 @@ function RPLSJC5() {
               </Typography>
               <Box component="ul" sx={{ pl: 2 }}>
                 <Typography component="li" variant="body1" color="primary">
-                  Telisai, Brunei
+                  Deep Water Bay, China
                 </Typography>
                 <Typography component="li" variant="body1" color="primary">
-                  Chung Hom Kok, China
+                  Ballesteros, Philippines
                 </Typography>
                 <Typography component="li" variant="body1" color="primary">
-                  Shantou, China
+                  Changi North, Singapore
                 </Typography>
                 <Typography component="li" variant="body1" color="primary">
-                  Chikura, Japan
-                </Typography>
-                <Typography component="li" variant="body1" color="primary">
-                  Nasugbu, Philippines
-                </Typography>
-                <Typography component="li" variant="body1" color="primary">
-                  Tuas, Singapore
+                  Vung Tau, Vietnam
                 </Typography>
               </Box>
             </Box>
@@ -281,4 +294,4 @@ function RPLSJC5() {
   );
 }
 
-export default RPLSJC5;
+export default RPLTGNIA10;

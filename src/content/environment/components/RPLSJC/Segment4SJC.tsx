@@ -651,6 +651,19 @@ const Segment4SJC: React.FC<Segment4SJCProps> = ({
                       'Damage from ship anchor. Service affected along dragged path.'}
                   </Typography>
                 </Box>
+                <DialogActions>
+                  <Button onClick={() => externalHandleClose()} color="primary">
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    disabled={!isValid}
+                  >
+                    Cut Cable
+                  </Button>
+                </DialogActions>
               </Form>
             )}
           </Formik>

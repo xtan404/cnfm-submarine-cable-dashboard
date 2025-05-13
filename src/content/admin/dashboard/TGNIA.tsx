@@ -239,7 +239,7 @@ function TGNIA() {
 
   return (
     <>
-      <Polyline
+      {/*<Polyline
         positions={positions}
         pathOptions={{
           color: stats.avgUtilization > 0 ? 'yellow' : 'red',
@@ -249,7 +249,7 @@ function TGNIA() {
           click: handleOpen // Open modal on click
         }}
       />
-      {/* Hong Kong to Ballesteros Route */}
+       Hong Kong to Ballesteros Route 
       <Polyline
         positions={hongKongToBallesteros}
         pathOptions={{
@@ -259,9 +259,9 @@ function TGNIA() {
         eventHandlers={{
           click: handleOpen // Open modal on click
         }}
-      />
+      />*/}
       <DynamicMarker
-        position={[24.439158, 140.614021]}
+        position={[25.424989, 139.254041]}
         label={`Total Capacity: <strong>${stats.totalGbps} Gbps</strong><br>Average Utilization: <strong>${stats.avgUtilization}%</strong>`}
         count={zeroCount}
         onClick={handleOpen}

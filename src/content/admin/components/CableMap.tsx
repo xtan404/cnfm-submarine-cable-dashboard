@@ -27,6 +27,12 @@ import RPLSJC10 from '../dashboard/RoutePositionList/RPLSJC10';
 import RPLSJC11 from '../dashboard/RoutePositionList/RPLSJC11';
 import RPLSJC12 from '../dashboard/RoutePositionList/RPLSJC12';
 import RPLSJC13 from '../dashboard/RoutePositionList/RPLSJC13';
+import RPLTGNIA7 from '../dashboard/RoutePositionList/RPLTGNIA7';
+import RPLTGNIA8 from '../dashboard/RoutePositionList/RPLTGNIA8';
+import RPLTGNIA9 from '../dashboard/RoutePositionList/RPLTGNIA9';
+import RPLTGNIA10 from '../dashboard/RoutePositionList/RPLTGNIA10';
+import RPLTGNIA11 from '../dashboard/RoutePositionList/RPLTGNIA11';
+import RPLTGNIA12 from '../dashboard/RoutePositionList/RPLTGNIA12';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -326,6 +332,12 @@ const CableMap = () => {
         <RPLSJC11 />
         <RPLSJC12 />
         <RPLSJC13 />
+        <RPLTGNIA7 />
+        <RPLTGNIA8 />
+        <RPLTGNIA9 />
+        <RPLTGNIA10 />
+        <RPLTGNIA11 />
+        <RPLTGNIA12 />
         <SJC />
         <C2C />
         <TGNIA />

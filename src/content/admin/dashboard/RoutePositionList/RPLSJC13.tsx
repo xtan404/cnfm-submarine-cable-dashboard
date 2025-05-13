@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Typography,
+  useTheme
+} from '@mui/material';
 import { Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -88,6 +99,7 @@ function RPLSJC13() {
   const port = process.env.REACT_APP_PORT;
   const [positions, setPositions] = useState<[number, number][]>([]);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const [defineCableOpen, setDefineCableOpen] = useState(false);
 
   // Fetch polyline and marker data
   useEffect(() => {
@@ -163,6 +175,9 @@ function RPLSJC13() {
     return () => clearInterval(interval);
   }, [apiBaseUrl, port]);
 
+  const handleOpenDefine = () => setDefineCableOpen(true);
+  const handleCloseDefine = () => setDefineCableOpen(false);
+
   return (
     <>
       {/* Polyline Path */}
@@ -171,6 +186,9 @@ function RPLSJC13() {
         pathOptions={{
           color: 'blue',
           weight: 4
+        }}
+        eventHandlers={{
+          click: handleOpenDefine // Open modal on click
         }}
       />
 
@@ -183,6 +201,82 @@ function RPLSJC13() {
           minZoom={7.5} // Set minimum zoom level to 5
         />
       ))}
+      {/* Define Cable Modal Dialog */}
+      <Dialog
+        open={defineCableOpen}
+        onClose={handleCloseDefine}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h5">SJC Submarine Cable Details</Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <CardContent>
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Ready For Service
+              </Typography>
+              <Typography variant="body1" color="primary" paragraph>
+                2013 June
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Cable Length
+              </Typography>
+              <Typography variant="body1" paragraph>
+                8,900 km
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Owners
+              </Typography>
+              <Typography variant="body1" paragraph>
+                China Mobile, China Telecom, Chunghwa Telecom, Globe Telecom,
+                Google, KDDI, National Telecom, Singtel, Telkom Indonesia,
+                Unified National Networks (UNN)
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Suppliers
+              </Typography>
+              <Typography variant="body1" color="primary" paragraph>
+                NEC, SubCom
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Landing Points
+              </Typography>
+              <Box component="ul" sx={{ pl: 2 }}>
+                <Typography component="li" variant="body1" color="primary">
+                  Telisai, Brunei
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Chung Hom Kok, China
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Shantou, China
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Chikura, Japan
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Nasugbu, Philippines
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Tuas, Singapore
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDefine} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

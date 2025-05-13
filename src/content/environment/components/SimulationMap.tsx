@@ -29,6 +29,13 @@ import RPLSJC10 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC10';
 import RPLSJC11 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC11';
 import RPLSJC12 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC12';
 import RPLSJC13 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC13';
+import CutTGNIA from './RPLTGNIA/CutTGNIA';
+import RPLTGNIA7 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA7';
+import RPLTGNIA8 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA8';
+import RPLTGNIA9 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA9';
+import RPLTGNIA10 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA10';
+import RPLTGNIA11 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA11';
+import RPLTGNIA12 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA12';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -327,6 +334,12 @@ const SimulationMap = () => {
         <RPLSJC11 />
         <RPLSJC12 />
         <RPLSJC13 />
+        <RPLTGNIA7 />
+        <RPLTGNIA8 />
+        <RPLTGNIA9 />
+        <RPLTGNIA10 />
+        <RPLTGNIA11 />
+        <RPLTGNIA12 />
         <SeaUS />
         <SJC />
         <C2C />
@@ -334,6 +347,7 @@ const SimulationMap = () => {
         <ReturnButton />
         <CutSeaUS />
         <CutSJC />
+        <CutTGNIA />
       </MapContainer>
     </>
   );

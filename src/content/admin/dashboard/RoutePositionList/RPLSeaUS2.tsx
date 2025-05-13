@@ -1,5 +1,16 @@
 import { useEffect, useState } from 'react';
-import { useTheme } from '@mui/material';
+import {
+  Box,
+  Button,
+  CardContent,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Typography,
+  useTheme
+} from '@mui/material';
 import { Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
@@ -88,6 +99,7 @@ function RPLSeaUS2() {
   const port = process.env.REACT_APP_PORT;
   const [positions, setPositions] = useState<[number, number][]>([]);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const [defineCableOpen, setDefineCableOpen] = useState(false);
 
   // Fetch polyline and marker data
   useEffect(() => {
@@ -163,6 +175,9 @@ function RPLSeaUS2() {
     return () => clearInterval(interval);
   }, [apiBaseUrl, port]);
 
+  const handleOpenDefine = () => setDefineCableOpen(true);
+  const handleCloseDefine = () => setDefineCableOpen(false);
+
   return (
     <>
       {/* Polyline Path */}
@@ -171,6 +186,9 @@ function RPLSeaUS2() {
         pathOptions={{
           color: 'green',
           weight: 4
+        }}
+        eventHandlers={{
+          click: handleOpenDefine // Open modal on click
         }}
       />
 
@@ -183,6 +201,84 @@ function RPLSeaUS2() {
           minZoom={7.5} // Set minimum zoom level to 5
         />
       ))}
+      {/* Define Cable Modal Dialog */}
+      <Dialog
+        open={defineCableOpen}
+        onClose={handleCloseDefine}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          <Typography variant="h5">SEA-US Submarine Cable Details</Typography>
+        </DialogTitle>
+        <Divider />
+        <DialogContent>
+          <CardContent>
+            <Box sx={{ width: '100%' }}>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Ready For Service
+              </Typography>
+              <Typography variant="body1" color="primary" paragraph>
+                2017 August
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Cable Length
+              </Typography>
+              <Typography variant="body1" paragraph>
+                14,500 km
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Owners
+              </Typography>
+              <Typography variant="body1" paragraph>
+                GTA TeleGuam, Globe Telecom, Hawaiian Telcom, Lightstorm
+                Telecom, Telin
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Suppliers
+              </Typography>
+              <Typography variant="body1" color="primary" paragraph>
+                NEC
+              </Typography>
+
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                Landing Points
+              </Typography>
+              <Box component="ul" sx={{ pl: 2 }}>
+                <Typography component="li" variant="body1" color="primary">
+                  Piti, Guam
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Kauditan, Indonesia
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Magachgil, Yap, Micronesia
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Ngeremlengui, Palau
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Davao, Philippines
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Hermosa Beach, CA, United States
+                </Typography>
+                <Typography component="li" variant="body1" color="primary">
+                  Makaha, Hawaii, United States
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDefine} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
