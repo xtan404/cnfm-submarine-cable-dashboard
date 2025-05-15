@@ -261,7 +261,7 @@ function TGNIA() {
         }}
       />*/}
       <DynamicMarker
-        position={[25.424989, 139.254041]}
+        position={[26.06521, 139.076383]}
         label={`Total Capacity: <strong>${stats.totalGbps} Gbps</strong><br>Average Utilization: <strong>${stats.avgUtilization}%</strong>`}
         count={zeroCount}
         onClick={handleOpen}

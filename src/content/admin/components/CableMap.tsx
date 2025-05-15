@@ -27,6 +27,12 @@ import RPLSJC10 from '../dashboard/RoutePositionList/RPLSJC10';
 import RPLSJC11 from '../dashboard/RoutePositionList/RPLSJC11';
 import RPLSJC12 from '../dashboard/RoutePositionList/RPLSJC12';
 import RPLSJC13 from '../dashboard/RoutePositionList/RPLSJC13';
+import RPLTGNIA1 from '../dashboard/RoutePositionList/RPLTGNIA1';
+import RPLTGNIA2 from '../dashboard/RoutePositionList/RPLTGNIA2';
+import RPLTGNIA3 from '../dashboard/RoutePositionList/RPLTGNIA3';
+import RPLTGNIA4 from '../dashboard/RoutePositionList/RPLTGNIA4';
+import RPLTGNIA5 from '../dashboard/RoutePositionList/RPLTGNIA5';
+import RPLTGNIA6 from '../dashboard/RoutePositionList/RPLTGNIA6';
 import RPLTGNIA7 from '../dashboard/RoutePositionList/RPLTGNIA7';
 import RPLTGNIA8 from '../dashboard/RoutePositionList/RPLTGNIA8';
 import RPLTGNIA9 from '../dashboard/RoutePositionList/RPLTGNIA9';
@@ -306,11 +312,11 @@ const CableMap = () => {
         />
         <USAMarker />
         <DynamicMarker
-          position={[14.0665, 120.612]}
+          position={[14.0679, 120.6262]}
           label="Nasugbu, Philippines"
         />
         <DynamicMarker
-          position={[18.4088, 121.512596]}
+          position={[18.412883, 121.517283]}
           label="Ballesteros, Philippines"
         />
         <JapanMarker />
@@ -332,6 +338,12 @@ const CableMap = () => {
         <RPLSJC11 />
         <RPLSJC12 />
         <RPLSJC13 />
+        <RPLTGNIA1 />
+        <RPLTGNIA2 />
+        <RPLTGNIA3 />
+        <RPLTGNIA4 />
+        <RPLTGNIA5 />
+        <RPLTGNIA6 />
         <RPLTGNIA7 />
         <RPLTGNIA8 />
         <RPLTGNIA9 />

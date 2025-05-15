@@ -196,7 +196,7 @@ const JapanMarker = () => {
   return (
     <>
       <DynamicMarker
-        position={[35.015, 139.9533]}
+        position={[34.9706, 139.9615]}
         label="Japan"
         icon={japanFlagIcon}
         onClick={handleOpen}

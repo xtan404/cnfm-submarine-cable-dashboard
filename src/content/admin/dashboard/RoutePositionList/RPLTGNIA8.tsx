@@ -162,7 +162,9 @@ function RPLTGNIA8() {
               (item: any) =>
                 item.event &&
                 typeof item.event === 'string' &&
-                (item.event.includes('BMH') || item.event.includes('BU'))
+                (item.event.includes('BMH') ||
+                  item.event.includes('BU') ||
+                  item.event.includes('S8.RT'))
             )
             .map((item: any) => ({
               latitude: parseFloat(item.full_latitude),

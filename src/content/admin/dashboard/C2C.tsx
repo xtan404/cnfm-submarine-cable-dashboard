@@ -217,22 +217,22 @@ function C2C() {
 
   // C2C Cable System Route (Singapore to Japan with curved path avoiding Taiwan)
   const positions = [
-    [1.3214, 103.6513], // Tuas, Singapore
+    [1.338, 103.6352], // Tuas, Singapore
     [5.0, 105.0], // Near Sumatra for a natural curve
     [7.5, 115.0], // South China Sea bend
-    [14.0665, 120.612], // Nasugbu, Philippines
+    [14.0679, 120.6262], // Nasugbu, Philippines
     [17.0665, 115.312], // Nasugbu to Hong Kong Intersection
     [23.05, 122.25], // New point along the straight polyline, closer to (25.0, 124.7)
     [25.0, 124.7], // East China Sea (Curving East to avoid Taiwan)
     [30.0, 130.0], // Further curving North East
-    [35.015, 139.9533] // Chikura, Japan
+    [34.9706, 139.9615] // Chikura, Japan
   ];
 
   // Hong Kong to Nasugbu Connection intersecting West Philippine Sea
   const hongKongToNasugbu = [
-    [22.3193, 114.1694], // Hong Kong
+    [22.2151, 114.2062], // Hong Kong
     [17.0665, 115.312], // West Philippine Sea intersection
-    [14.0665, 120.612] // Nasugbu, Philippines
+    [14.0679, 120.6262] // Nasugbu, Philippines
   ];
 
   // Handle Dialog Open/Close

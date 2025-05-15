@@ -93,7 +93,7 @@ function DynamicMarker({
   return null;
 }
 
-function RPLTGNIA9() {
+function RPLTGNIA5() {
   const theme = useTheme();
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
@@ -107,7 +107,7 @@ function RPLTGNIA9() {
 
     const fetchPolylineData = async () => {
       try {
-        const response = await fetch(`${apiBaseUrl}${port}/tgnia-rpl-s9`);
+        const response = await fetch(`${apiBaseUrl}${port}/tgnia-rpl-s5`);
         const result = await response.json();
 
         if (Array.isArray(result) && result.length > 0) {
@@ -133,6 +133,7 @@ function RPLTGNIA9() {
               (coords: [number, number]) =>
                 !isNaN(coords[0]) && !isNaN(coords[1])
             );
+
           setPositions(mappedPositions);
 
           if (mappedPositions.length > 0) {
@@ -151,7 +152,7 @@ function RPLTGNIA9() {
     // Fetch marker data
     const fetchMarkerData = async () => {
       try {
-        const response = await fetch(`${apiBaseUrl}${port}/tgnia-rpl-s9`);
+        const response = await fetch(`${apiBaseUrl}${port}/tgnia-rpl-s5`);
         const result = await response.json();
 
         if (Array.isArray(result) && result.length > 0) {
@@ -161,9 +162,9 @@ function RPLTGNIA9() {
               (item: any) =>
                 item.event &&
                 typeof item.event === 'string' &&
-                (item.event.includes('BMH') ||
-                  item.event.includes('BU') ||
-                  item.event.includes('S9.RT'))
+                (item.event.includes('S5.RT') ||
+                  item.event.includes('S5.RN') ||
+                  item.event.includes('BU'))
             )
             .map((item: any) => ({
               latitude: parseFloat(item.full_latitude),
@@ -223,6 +224,7 @@ function RPLTGNIA9() {
           minZoom={7.5} // Set minimum zoom level to 5
         />
       ))}
+
       {/* Define Cable Modal Dialog */}
       <Dialog
         open={defineCableOpen}
@@ -295,4 +297,4 @@ function RPLTGNIA9() {
   );
 }
 
-export default RPLTGNIA9;
+export default RPLTGNIA5;

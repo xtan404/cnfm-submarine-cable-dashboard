@@ -30,6 +30,12 @@ import RPLSJC11 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC11';
 import RPLSJC12 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC12';
 import RPLSJC13 from 'src/content/admin/dashboard/RoutePositionList/RPLSJC13';
 import CutTGNIA from './RPLTGNIA/CutTGNIA';
+import RPLTGNIA1 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA1';
+import RPLTGNIA2 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA2';
+import RPLTGNIA3 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA3';
+import RPLTGNIA4 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA4';
+import RPLTGNIA5 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA5';
+import RPLTGNIA6 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA6';
 import RPLTGNIA7 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA7';
 import RPLTGNIA8 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA8';
 import RPLTGNIA9 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA9';
@@ -335,6 +341,12 @@ const SimulationMap = () => {
         <RPLSJC11 />
         <RPLSJC12 />
         <RPLSJC13 />
+        <RPLTGNIA1 />
+        <RPLTGNIA2 />
+        <RPLTGNIA3 />
+        <RPLTGNIA4 />
+        <RPLTGNIA5 />
+        <RPLTGNIA6 />
         <RPLTGNIA7 />
         <RPLTGNIA8 />
         <RPLTGNIA9 />
