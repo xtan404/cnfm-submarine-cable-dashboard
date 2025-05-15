@@ -273,42 +273,7 @@ const Segment1SeaUS: React.FC<Segment1SeaUSProps> = ({
         </div>
         
         <div style="background-color: white; padding: 12px;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-            <tr>
-              <td style="font-weight: bold; padding-bottom: 8px;">Distance:</td>
-              <td style="text-align: right; padding-bottom: 8px;">${cut.distance.toFixed(
-                3
-              )} km</td>
-            </tr>
-            <tr>
-              <td style="font-weight: bold; padding-bottom: 8px;">Depth:</td>
-              <td style="text-align: right; padding-bottom: 8px;">${depth} m</td>
-            </tr>
-            <tr>
-              <td colspan="2" style="font-weight: bold; padding-bottom: 4px;">Location:</td>
-            </tr>
-            <tr>
-              <td colspan="2" style="padding-bottom: 8px; font-size: 12px; color: #444;">
-                ${
-                  beforeCut
-                    ? `From: ${beforeCut.event} (${beforeCut.cable_cumulative_total} km)`
-                    : ''
-                }
-                ${beforeCut && afterCut ? '<br>' : ''}
-                ${
-                  afterCut
-                    ? `To: ${afterCut.event} (${afterCut.cable_cumulative_total} km)`
-                    : ''
-                }
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2" style="font-weight: bold; padding-bottom: 4px; color: #d32f2f;">Impact:</td>
-            </tr>
-            <tr>
-              <td colspan="2" style="font-size: 12px; color: #d32f2f; padding-bottom: 8px;">${impactDescription}</td>
-            </tr>
-          </table>
+          
           <div style="font-size: 11px; color: #777; text-align: right; margin-top: 8px; font-style: italic;">
             Simulated: ${timestamp}
           </div>
@@ -366,8 +331,8 @@ const Segment1SeaUS: React.FC<Segment1SeaUSProps> = ({
   const handleCut = (values) => {
     const { kmValue, cutType } = values;
 
-    console.log('Cut distance:', kmValue, 'km');
-    console.log('Cut type:', cutType);
+    //console.log('Cut distance:', kmValue, 'km');
+    //console.log('Cut type:', cutType);
 
     // Find cable segments where cut distance falls between
     const { beforeCut, afterCut } = findCableSegmentsForCutDistance(kmValue);
@@ -444,28 +409,20 @@ const Segment1SeaUS: React.FC<Segment1SeaUSProps> = ({
               <td style="text-align: right; padding-bottom: 8px;">${depth} m</td>
             </tr>
             <tr>
-              <td colspan="2" style="font-weight: bold; padding-bottom: 4px;">Location:</td>
+              <td style="font-weight: bold; padding-bottom: 8px;">Latitude:</td>
+              <td style="text-align: right; padding-bottom: 8px;">${
+                cutPoint && cutPoint.length >= 2
+                  ? `${Number(cutPoint[0]).toFixed(6)}`
+                  : ''
+              }</td>
             </tr>
             <tr>
-              <td colspan="2" style="padding-bottom: 8px; font-size: 12px; color: #444;">
-                ${
-                  beforeCut
-                    ? `From: ${beforeCut.event} (${beforeCut.cable_cumulative_total} km)`
-                    : ''
-                }
-                ${beforeCut && afterCut ? '<br>' : ''}
-                ${
-                  afterCut
-                    ? `To: ${afterCut.event} (${afterCut.cable_cumulative_total} km)`
-                    : ''
-                }
-              </td>
-            </tr>
-            <tr>
-              <td colspan="2" style="font-weight: bold; padding-bottom: 4px; color: #d32f2f;">Impact:</td>
-            </tr>
-            <tr>
-              <td colspan="2" style="font-size: 12px; color: #d32f2f; padding-bottom: 8px;">${impactDescription}</td>
+              <td style="font-weight: bold; padding-bottom: 8px;">Longitude:</td>
+              <td style="text-align: right; padding-bottom: 8px;">${
+                cutPoint && cutPoint.length >= 2
+                  ? `${Number(cutPoint[1]).toFixed(6)}`
+                  : ''
+              }</td>
             </tr>
           </table>
           <div style="font-size: 11px; color: #777; text-align: right; margin-top: 8px; font-style: italic;">

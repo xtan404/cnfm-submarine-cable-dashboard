@@ -36,6 +36,7 @@ import RPLTGNIA9 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA9';
 import RPLTGNIA10 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA10';
 import RPLTGNIA11 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA11';
 import RPLTGNIA12 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA12';
+import ResetButton from './ResetButton';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -348,6 +349,7 @@ const SimulationMap = () => {
         <CutSeaUS />
         <CutSJC />
         <CutTGNIA />
+        <ResetButton />
       </MapContainer>
     </>
   );
