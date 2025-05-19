@@ -244,25 +244,6 @@ const Segment1SeaUS: React.FC<Segment1SeaUSProps> = ({
       // Format timestamp for display
       const timestamp = new Date(cut.timestamp).toLocaleString();
 
-      // Determine impact description based on cut type
-      let impactDescription = '';
-      switch (cut.cutType) {
-        case 'Shunt Fault':
-          impactDescription = 'Gradual degradation of service quality';
-          break;
-        case 'Partial Fiber Break':
-          impactDescription = 'Partial service disruption (50% capacity loss)';
-          break;
-        case 'Fiber Break':
-          impactDescription = 'Complete service disruption on affected fibers';
-          break;
-        case 'Full Cut':
-          impactDescription = 'Total cable failure, complete service outage';
-          break;
-        default:
-          impactDescription = 'Service impact unknown';
-      }
-
       // Add popup with enhanced information
       const popupContent = `
       <div class="cable-cut-popup" style="font-family: Arial, sans-serif; width: 250px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">

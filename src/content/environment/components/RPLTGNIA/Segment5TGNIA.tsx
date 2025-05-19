@@ -18,7 +18,7 @@ import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
 // Define prop types for TypeScript
-interface Segment1SJCProps {
+interface Segment5TGNIAProps {
   handleClose?: () => void; // Make it optional to maintain backward compatibility
 }
 
@@ -26,12 +26,12 @@ interface Segment1SJCProps {
 const validationSchema = Yup.object({
   kmValue: Yup.number()
     .required('Distance value is required')
-    .min(5.212, 'Distance out of bounds (BMH Tuas)')
-    .max(39.756, 'Distance cannot exceed Lay Interface'),
+    .min(0, 'Distance out of bounds (BU4)')
+    .max(878.697, 'Distance cannot exceed BU5'),
   cutType: Yup.string().required('Cut type selection is required')
 });
 
-const Segment1SJC: React.FC<Segment1SJCProps> = ({
+const Segment5TGNIA: React.FC<Segment5TGNIAProps> = ({
   handleClose: externalHandleClose
 }) => {
   const map = useMap();
@@ -49,7 +49,7 @@ const Segment1SJC: React.FC<Segment1SJCProps> = ({
     const fetchCableData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${apiBaseUrl}${port}/sjc-rpl-s1`);
+        const response = await fetch(`${apiBaseUrl}${port}/tgnia-rpl-s5`);
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
         }
@@ -69,7 +69,7 @@ const Segment1SJC: React.FC<Segment1SJCProps> = ({
 
   // Load existing cuts from localStorage when component mounts
   useEffect(() => {
-    const storedCuts = localStorage.getItem('sjcCableCuts');
+    const storedCuts = localStorage.getItem('tgniaCableCuts');
     if (storedCuts) {
       const parsedCuts = JSON.parse(storedCuts);
       setCuts(parsedCuts);
@@ -604,4 +604,4 @@ const Segment1SJC: React.FC<Segment1SJCProps> = ({
   );
 };
 
-export default Segment1SJC;
+export default Segment5TGNIA;

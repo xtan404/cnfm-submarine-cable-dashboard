@@ -15,6 +15,12 @@ import {
   Tab,
   Tabs
 } from '@mui/material';
+import Segment1TGNIA from './Segment1TGNIA';
+import Segment2TGNIA from './Segment2TGNIA';
+import Segment3TGNIA from './Segment3TGNIA';
+import Segment4TGNIA from './Segment4TGNIA';
+import Segment5TGNIA from './Segment5TGNIA';
+import Segment6TGNIA from './Segment6TGNIA';
 import Segment7TGNIA from './Segment7TGNIA';
 import Segment8TGNIA from './Segment8TGNIA';
 import Segment9TGNIA from './Segment9TGNIA';
@@ -134,7 +140,7 @@ const CutTGNIA: React.FC<CutTGNIAProps> = ({ handleClose }) => {
           <Dialog
             open={open}
             onClose={handleDialogClose}
-            maxWidth="md"
+            maxWidth="xl"
             fullWidth
           >
             <DialogTitle sx={{ mt: 3 }}>
@@ -152,29 +158,53 @@ const CutTGNIA: React.FC<CutTGNIAProps> = ({ handleClose }) => {
                   onChange={handleChange}
                   aria-label="basic tabs example"
                 >
-                  <Tab label="Segment 7" {...a11yProps(0)} />
-                  <Tab label="Segment 8" {...a11yProps(1)} />
-                  <Tab label="Segment 9" {...a11yProps(2)} />
-                  <Tab label="Segment 10" {...a11yProps(3)} />
-                  <Tab label="Segment 11" {...a11yProps(4)} />
-                  <Tab label="Segment 12" {...a11yProps(5)} />
+                  <Tab label="Segment 1" {...a11yProps(0)} />
+                  <Tab label="Segment 2" {...a11yProps(1)} />
+                  <Tab label="Segment 3" {...a11yProps(2)} />
+                  <Tab label="Segment 4" {...a11yProps(3)} />
+                  <Tab label="Segment 5" {...a11yProps(4)} />
+                  <Tab label="Segment 6" {...a11yProps(5)} />
+                  <Tab label="Segment 7" {...a11yProps(6)} />
+                  <Tab label="Segment 8" {...a11yProps(7)} />
+                  <Tab label="Segment 9" {...a11yProps(8)} />
+                  <Tab label="Segment 10" {...a11yProps(9)} />
+                  <Tab label="Segment 11" {...a11yProps(10)} />
+                  <Tab label="Segment 12" {...a11yProps(11)} />
                 </Tabs>
                 <TabPanel value={value} index={0}>
-                  <Segment7TGNIA handleClose={handleDialogClose} />
+                  <Segment1TGNIA handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                  <Segment8TGNIA handleClose={handleDialogClose} />
+                  <Segment2TGNIA handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={2}>
-                  <Segment9TGNIA handleClose={handleDialogClose} />
+                  <Segment3TGNIA handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={3}>
-                  <Segment10TGNIA handleClose={handleDialogClose} />
+                  <Segment4TGNIA handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={4}>
-                  <Segment11TGNIA handleClose={handleDialogClose} />
+                  <Segment5TGNIA handleClose={handleDialogClose} />
                 </TabPanel>
                 <TabPanel value={value} index={5}>
+                  <Segment6TGNIA handleClose={handleDialogClose} />
+                </TabPanel>
+                <TabPanel value={value} index={6}>
+                  <Segment7TGNIA handleClose={handleDialogClose} />
+                </TabPanel>
+                <TabPanel value={value} index={7}>
+                  <Segment8TGNIA handleClose={handleDialogClose} />
+                </TabPanel>
+                <TabPanel value={value} index={8}>
+                  <Segment9TGNIA handleClose={handleDialogClose} />
+                </TabPanel>
+                <TabPanel value={value} index={9}>
+                  <Segment10TGNIA handleClose={handleDialogClose} />
+                </TabPanel>
+                <TabPanel value={value} index={10}>
+                  <Segment11TGNIA handleClose={handleDialogClose} />
+                </TabPanel>
+                <TabPanel value={value} index={11}>
                   <Segment12TGNIA handleClose={handleDialogClose} />
                 </TabPanel>
               </Box>

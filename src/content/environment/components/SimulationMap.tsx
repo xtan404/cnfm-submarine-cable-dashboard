@@ -316,11 +316,11 @@ const SimulationMap = () => {
         />
         <USAMarker />
         <DynamicMarker
-          position={[14.0665, 120.612]}
+          position={[14.0679, 120.6262]}
           label="Nasugbu, Philippines"
         />
         <DynamicMarker
-          position={[18.4088, 121.512596]}
+          position={[18.412883, 121.517283]}
           label="Ballesteros, Philippines"
         />
         <JapanMarker />

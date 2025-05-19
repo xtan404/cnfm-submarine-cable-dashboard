@@ -101,6 +101,68 @@ function RPLSJC1() {
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [defineCableOpen, setDefineCableOpen] = useState(false);
 
+  // ✅ Combine all related state values into one object
+  const [stats, setStats] = useState({
+    data: [],
+    totalGbps: 0,
+    avgUtilization: 0,
+    zeroUtilizationCount: 0
+  });
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`${apiBaseUrl}${port}/sjc`);
+        const result = await response.json();
+
+        if (Array.isArray(result) && result.length > 0) {
+          const totalGbps = result.reduce(
+            (sum, item) => sum + (item.gbps_capacity || 0),
+            0
+          );
+
+          const totalUtilization = result.reduce(
+            (sum, item) => sum + (item.percent_utilization || 0),
+            0
+          );
+
+          const avgUtilization = parseFloat(
+            (totalUtilization / result.length).toFixed(2)
+          );
+
+          const zeroCount = result.filter(
+            (item) => item.percent_utilization === 0
+          ).length;
+
+          // ✅ Set all state values in a single update
+          setStats({
+            data: result,
+            totalGbps,
+            avgUtilization,
+            zeroUtilizationCount: zeroCount
+          });
+
+          // ✅ Stop interval after successful fetch
+          clearInterval(interval);
+        } else {
+          console.log('No data received, retrying...');
+        }
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    };
+
+    // Run immediately on mount
+    fetchData();
+
+    // Set up interval to retry every 2s if no data yet
+    interval = setInterval(fetchData, 2000);
+
+    return () => clearInterval(interval); // Cleanup on unmount
+  }, [apiBaseUrl, port]);
+
   // Fetch polyline and marker data
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -184,7 +246,7 @@ function RPLSJC1() {
       <Polyline
         positions={positions}
         pathOptions={{
-          color: 'blue',
+          color: stats.avgUtilization > 0 ? 'blue' : 'red',
           weight: 4
         }}
         eventHandlers={{
@@ -198,7 +260,7 @@ function RPLSJC1() {
           key={`marker-${index}`}
           position={[marker.latitude, marker.longitude] as [number, number]}
           label={marker.label}
-          minZoom={7.5} // Set minimum zoom level to 5
+          minZoom={9} // Set minimum zoom level to 5
         />
       ))}
       {/* Define Cable Modal Dialog */}
