@@ -196,7 +196,7 @@ const SingaporeMarker = () => {
   return (
     <>
       <DynamicMarker
-        position={[1.338, 103.6352]}
+        position={[1.35438, 103.801711]}
         label="Singapore"
         icon={singaporeFlagIcon}
         onClick={handleOpen}

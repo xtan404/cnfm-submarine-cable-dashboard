@@ -81,7 +81,7 @@ function DynamicMarker({ position, label, icon }: DynamicMarkerProps) {
         `<span style="font-size: 14px; font-weight: bold;">${label}</span>`,
         {
           direction: 'top',
-          offset: icon ? [0, -30] : [0, -10], // 👈 Tooltip offset adjusted here
+          offset: icon ? [0, -30] : [0, -10], // Tooltip offset adjusted here
           permanent: false,
           opacity: 1
         }
@@ -98,6 +98,18 @@ function DynamicMarker({ position, label, icon }: DynamicMarkerProps) {
   return null;
 }
 
+// Custom component to remove attribution
+const RemoveAttribution = () => {
+  const map = useMap();
+
+  useEffect(() => {
+    // Remove attribution control when component mounts
+    map.attributionControl.remove();
+  }, [map]);
+
+  return null;
+};
+
 const CableMap = () => {
   const [mapHeight, setMapHeight] = useState('600px');
   const [ipopUtilization, setIpopUtilization] = useState('0%');
@@ -110,6 +122,7 @@ const CableMap = () => {
   });
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
+  const mapApiKey = process.env.REACT_APP_GEOAPIFY_API_KEY;
 
   // Function to update height dynamically
   const updateMapHeight = () => {
@@ -130,6 +143,7 @@ const CableMap = () => {
     window.addEventListener('resize', updateMapHeight);
     return () => window.removeEventListener('resize', updateMapHeight);
   }, []);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -162,7 +176,7 @@ const CableMap = () => {
             zeroUtilizationCount: zeroCount
           });
 
-          // ✅ Stop interval after successful fetch
+          // Stop interval after successful fetch
           clearInterval(interval);
         } else {
           console.log('No data received, retrying...');
@@ -224,25 +238,15 @@ const CableMap = () => {
     return () => clearInterval(interval); // Cleanup on unmount
   }, [apiBaseUrl, port]);
 
-  // Custom component to remove attribution
-  const RemoveAttribution = () => {
-    const map = useMap();
-
-    useEffect(() => {
-      // Remove attribution control when component mounts
-      map.attributionControl.remove();
-    }, [map]);
-
-    return null;
-  };
-
   return (
     <>
       {/* Map Container */}
       <MapContainer style={{ height: mapHeight, width: '100%' }}>
         <RemoveAttribution />
         <ChangeView center={[18, 134]} zoom={3.5} />
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer
+          url={`https://maps.geoapify.com/v1/tile/klokantech-basic/{z}/{x}/{y}.png?apiKey=${mapApiKey}`}
+        />
         <Box
           sx={{
             position: 'absolute',
@@ -298,11 +302,11 @@ const CableMap = () => {
         </Box>
         {/* Dynamic Hoverable Dot Markers*/}
         <DynamicMarker
-          position={[1.367833, 125.078783]}
+          position={[1.3678, 125.0788]}
           label="Kauditan, Indonesia"
         />
         <DynamicMarker
-          position={[7.043883, 125.542033]}
+          position={[7.0439, 125.542]}
           label="Davao, Philippines"
         />
         <DynamicMarker position={[13.464717, 144.69305]} label="Piti, Guam" />

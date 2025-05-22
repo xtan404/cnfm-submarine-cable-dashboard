@@ -114,6 +114,7 @@ const SimulationMap = () => {
   });
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
+  const mapApiKey = process.env.REACT_APP_GEOAPIFY_API_KEY;
 
   // Function to update height dynamically
   const updateMapHeight = () => {
@@ -246,7 +247,10 @@ const SimulationMap = () => {
       <MapContainer style={{ height: mapHeight, width: '100%' }}>
         <RemoveAttribution />
         <ChangeView center={[18, 134]} zoom={3.5} />
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {/*<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />*/}
+        <TileLayer
+          url={`https://maps.geoapify.com/v1/tile/klokantech-basic/{z}/{x}/{y}.png?apiKey=${mapApiKey}`}
+        />
         <Box
           sx={{
             position: 'absolute',
@@ -302,11 +306,11 @@ const SimulationMap = () => {
         </Box>
         {/* Dynamic Hoverable Dot Markers*/}
         <DynamicMarker
-          position={[1.367833, 125.078783]}
+          position={[1.3678, 125.0788]}
           label="Kauditan, Indonesia"
         />
         <DynamicMarker
-          position={[7.043883, 125.542033]}
+          position={[7.0439, 125.542]}
           label="Davao, Philippines"
         />
         <DynamicMarker position={[13.464717, 144.69305]} label="Piti, Guam" />

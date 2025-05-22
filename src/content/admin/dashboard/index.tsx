@@ -15,6 +15,7 @@ import Swal from 'sweetalert2';
 import Header from 'src/components/Header';
 import CableMap from '../components/CableMap';
 import React, { useEffect, useState } from 'react';
+import SegmentUpdate from './SegmentUpdate';
 
 const legendItems = [
   { name: 'SJC', color: 'blue' },
@@ -220,23 +221,23 @@ function AdminDashboard() {
                           variant="contained"
                           startIcon={<DeleteForeverIcon />}
                           onClick={handleClearData}
-                          color="error"
                           sx={{
                             backgroundColor: '#d32f2f',
                             '&:hover': {
                               backgroundColor: '#b71c1c'
-                            },
-                            mx: 1
+                            }
                           }}
                         >
                           {' Clear Data'}
                         </Button>
-
                         <Button
                           variant="contained"
                           startIcon={<UploadFileIcon />}
                           onClick={handleNewDataClick}
                           color="primary"
+                          sx={{
+                            mx: 0.5
+                          }}
                         >
                           {' New Data'}
                         </Button>
@@ -247,6 +248,7 @@ function AdminDashboard() {
                           onChange={handleFileChange}
                           style={{ display: 'none' }}
                         />
+                        <SegmentUpdate />
                       </Box>
                     </Box>
                     {/* Map Container */}
