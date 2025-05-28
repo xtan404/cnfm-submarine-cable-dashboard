@@ -62,7 +62,7 @@ const SimulationButton = () => {
 
         // Add click behavior
         button.onclick = function () {
-          window.location.href = '/simulation'; // Change this to your target URL
+          window.location.href = '/dashboard/simulation'; // Change this to your target URL
         };
 
         buttonContainer.appendChild(button);

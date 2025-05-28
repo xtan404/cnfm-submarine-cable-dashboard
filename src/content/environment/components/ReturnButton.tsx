@@ -2,9 +2,11 @@ import React from 'react';
 import { useMap } from 'react-leaflet';
 import { useEffect } from 'react';
 import L from 'leaflet';
+import { useNavigate } from 'react-router-dom';
 
 const ReturnButton = () => {
   const map = useMap();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Remove default attribution control
@@ -70,7 +72,7 @@ const ReturnButton = () => {
         // Add click behavior
         button.onclick = function () {
           localStorage.removeItem('seausCableCuts'); // Clear simulation data
-          window.location.href = '/'; // Change this to your target URL
+          navigate(-1);
         };
 
         buttonContainer.appendChild(button);

@@ -77,6 +77,8 @@ const LoginPage = () => {
     user_password: '',
     user_role: ''
   });
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const port = process.env.REACT_APP_PORT;
 
   const formik = useFormik({
     initialValues: {
@@ -93,14 +95,13 @@ const LoginPage = () => {
       handleLogin(values);
     }
   });
-  //http://localhost/cnfm-php-api/login?action=login
   const navigate = useNavigate();
   const handleLogin = async (values: {
     user_email: string;
     user_password: string;
   }) => {
     try {
-      const response = await axios.post('http://localhost:8081/login', values);
+      const response = await axios.post(`${apiBaseUrl}${port}/login`, values);
       if (response.data.success) {
         localStorage.setItem('loggedIn', 'true');
         localStorage.setItem('user_fname', response.data.user_fname);
@@ -119,10 +120,12 @@ const LoginPage = () => {
           timer: 2000,
           showConfirmButton: false
         }).then(() => {
-          if (response.data.user_role === 'Admin') {
-            navigate('/admin/dashboard');
+          if (response.data.user_role === 'Administrator') {
+            navigate('/dashboard/admin');
+          } else if (response.data.user_role === 'Simulator') {
+            navigate('/dashboard/simulator');
           } else {
-            navigate('/user/home'); // Adjust this for different roles
+            navigate('/home');
           }
         });
       } else {
@@ -190,41 +193,9 @@ const LoginPage = () => {
           marginTop: 4
         }}
       >
-        <SideCard
-          sx={{
-            display: isSmallScreen ? 'none' : 'block', // Hide on small screens
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            bottom: 0,
-            width: '30%',
-            maxWidth: '400px',
-            backgroundColor: 'white',
-            boxShadow: 3,
-            padding: 4
-          }}
-        >
+        <Card>
           <CardContent
-            sx={{ padding: (theme) => `${theme.spacing(4, 5, 4)} !important` }}
-          >
-            Core Network and Facilities Management
-          </CardContent>
-        </SideCard>
-        <Card
-          sx={{
-            marginLeft: isSmallScreen ? 0 : '30%', // Adjust for sidebar presence
-            display: 'flex',
-            alignItems: 'center', // Center vertically
-            justifyContent: 'center', // Center horizontally
-            width: '100%',
-            maxWidth: 500,
-            minHeight: 600, // Ensures card does not shrink when errors appear
-            padding: 4, // Adds spacing
-            boxShadow: 3 // Slight shadow for better UI
-          }}
-        >
-          <CardContent
-            sx={{ padding: (theme) => `${theme.spacing(4, 5, 4)} !important` }}
+            sx={{ padding: (theme) => `${theme.spacing(3, 4, 3)} !important` }}
           >
             <Box
               sx={{
@@ -234,7 +205,7 @@ const LoginPage = () => {
                 justifyContent: 'center'
               }}
             >
-              <Grid sx={{ paddingRight: 2 }}>
+              <Grid sx={{ paddingTop: 1, paddingRight: 2 }}>
                 <img
                   src="/images/logos/CNFM-LOGO.png"
                   alt="Logo"
@@ -344,10 +315,8 @@ const LoginPage = () => {
                 }}
               >
                 <Typography variant="body2" sx={{ marginRight: 1 }}>
-                  New on our platform?
-                </Typography>
-                <Typography variant="body2">
-                  <LinkStyled href="/register">Create an account</LinkStyled>
+                  An account will be created for you if you don't have one.
+                  Contact your administrator for more information.
                 </Typography>
               </Box>
             </form>
