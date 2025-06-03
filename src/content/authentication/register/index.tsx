@@ -55,6 +55,8 @@ const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(
 const RegisterPage = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const port = process.env.REACT_APP_PORT;
 
   const formik = useFormik({
     initialValues: {
@@ -89,7 +91,7 @@ const RegisterPage = () => {
     if (Object.keys(isValid).length === 0) {
       try {
         const response = await axios.post(
-          'http://localhost:8081/register',
+          `${apiBaseUrl}${port}/register`,
           values,
           {
             headers: {

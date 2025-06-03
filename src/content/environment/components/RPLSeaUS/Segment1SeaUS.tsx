@@ -325,7 +325,7 @@ const Segment1SeaUS: React.FC<Segment1SeaUSProps> = ({
 
       const updatedCuts = [...cuts, newCut];
       setCuts(updatedCuts);
-      localStorage.setItem('sjcCableCuts', JSON.stringify(updatedCuts));
+      localStorage.setItem('seausCableCuts', JSON.stringify(updatedCuts));
 
       displayCutOnMap(newCut);
 

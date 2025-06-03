@@ -38,6 +38,7 @@ import RPLTGNIA12 from '../admin/dashboard/RoutePositionList/RPLTGNIA12';
 import SJC from '../admin/dashboard/SJC';
 import C2C from '../admin/dashboard/C2C';
 import TGNIA from '../admin/dashboard/TGNIA';
+import CableCutsDisplay from 'src/contexts/CableCutsDisplay';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -356,6 +357,7 @@ const UserCableMap = () => {
         <SJC />
         <C2C />
         <TGNIA />
+        <CableCutsDisplay />
       </MapContainer>
     </>
   );

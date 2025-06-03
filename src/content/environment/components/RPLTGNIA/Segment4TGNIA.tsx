@@ -323,7 +323,7 @@ const Segment4TGNIA: React.FC<Segment4TGNIAProps> = ({
 
       const updatedCuts = [...cuts, newCut];
       setCuts(updatedCuts);
-      localStorage.setItem('sjcCableCuts', JSON.stringify(updatedCuts));
+      localStorage.setItem('tgniaCableCuts', JSON.stringify(updatedCuts));
 
       displayCutOnMap(newCut);
 

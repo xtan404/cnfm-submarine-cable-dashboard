@@ -14,10 +14,11 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
+import { useCableCuts } from 'src/contexts/CableCutContext'; // Import the context hook
 
 // Define prop types for TypeScript
 interface Segment2SeaUSProps {
-  handleClose?: () => void; // Make it optional to maintain backward compatibility
+  handleClose?: () => void;
 }
 
 // Validation schema
@@ -37,7 +38,10 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
   const [cableData, setCableData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [cuts, setCuts] = useState([]);
+
+  // Use the context instead of local state
+  const { cuts, addCut } = useCableCuts();
+
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
 
@@ -64,19 +68,12 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
     fetchCableData();
   }, [apiBaseUrl, port]);
 
-  // Load existing cuts from localStorage when component mounts
+  // Display existing cuts on the map when component mounts or cuts change
   useEffect(() => {
-    const storedCuts = localStorage.getItem('seausCableCuts');
-    if (storedCuts) {
-      const parsedCuts = JSON.parse(storedCuts);
-      setCuts(parsedCuts);
-
-      // Display all stored cuts on the map
-      parsedCuts.forEach((cut) => {
-        displayCutOnMap(cut);
-      });
-    }
-  }, [map]); // We need cableData to properly place cuts
+    cuts.forEach((cut) => {
+      displayCutOnMap(cut);
+    });
+  }, [cuts, cableData, map]);
 
   // Function to find cable segments based on cut distance
   const findCableSegmentsForCutDistance = (distance) => {
@@ -84,17 +81,13 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
       return { beforeCut: null, afterCut: null };
     }
 
-    // Sort data by cable_cumulative_total to ensure proper ordering
     const sortedData = [...cableData].sort(
       (a, b) =>
         parseFloat(a.cable_cumulative_total) -
         parseFloat(b.cable_cumulative_total)
     );
 
-    // Convert distance to number for comparison
     const cutDistance = parseFloat(distance);
-
-    // Find the two points where the cut distance falls between
     let beforeCut = null;
     let afterCut = null;
 
@@ -109,8 +102,6 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
         break;
       }
 
-      // If we're at the last item and still haven't found a match,
-      // the cut distance is beyond the last point
       if (i === sortedData.length - 1) {
         beforeCut = sortedData[i];
       }
@@ -122,7 +113,6 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
   // Function to calculate the interpolated cut point
   const calculateCutPoint = (beforeCut, afterCut, kmValue) => {
     if (!beforeCut || !afterCut) {
-      // If we don't have both points, return the one we have or null
       return beforeCut
         ? [
             parseFloat(beforeCut.full_latitude),
@@ -136,7 +126,6 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
         : null;
     }
 
-    // Get coordinates and distances
     const beforePoint = [
       parseFloat(beforeCut.full_latitude),
       parseFloat(beforeCut.full_longitude)
@@ -148,12 +137,10 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
     const beforeDist = parseFloat(beforeCut.cable_cumulative_total);
     const afterDist = parseFloat(afterCut.cable_cumulative_total);
 
-    // Calculate interpolation ratio
     const totalSegmentLength = afterDist - beforeDist;
     const distanceFromBefore = parseFloat(kmValue) - beforeDist;
     const ratio = distanceFromBefore / totalSegmentLength;
 
-    // Interpolate the cut point
     const cutLat = beforePoint[0] + ratio * (afterPoint[0] - beforePoint[0]);
     const cutLng = beforePoint[1] + ratio * (afterPoint[1] - beforePoint[1]);
 
@@ -249,7 +236,6 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
     const cutPoint = calculateCutPoint(beforeCut, afterCut, cut.distance);
 
     if (cutPoint) {
-      // Remove existing marker if it exists
       if (cutMarkersRef.current[cut.id]) {
         map.removeLayer(cutMarkersRef.current[cut.id]);
       }
@@ -257,7 +243,6 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
       const markerStyle = getMarkerStyle(cut.cutType);
       const depth = beforeCut?.Depth || afterCut?.Depth || 'Unknown';
 
-      // Create marker
       cutMarkersRef.current[cut.id] = L.marker(cutPoint, {
         icon: L.divIcon({
           className: `cut-marker-${cut.cutType}`,
@@ -321,9 +306,8 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
         depth: beforeCut?.Depth || afterCut?.Depth || 'Unknown'
       };
 
-      const updatedCuts = [...cuts, newCut];
-      setCuts(updatedCuts);
-      localStorage.setItem('sjcCableCuts', JSON.stringify(updatedCuts));
+      // Use context to add the cut
+      addCut(newCut);
 
       displayCutOnMap(newCut);
 

@@ -147,7 +147,6 @@ function RPLSeaUS2() {
           // ✅ Stop interval after successful fetch
           clearInterval(interval);
         } else {
-          console.log('No data received, retrying...');
         }
       } catch (err) {
         console.error('Error fetching data:', err);
@@ -188,7 +187,6 @@ function RPLSeaUS2() {
           setPositions(mappedPositions);
           clearInterval(interval);
         } else {
-          console.log('No polyline data received, retrying...');
         }
       } catch (err) {
         console.error('Error fetching polyline data:', err);
@@ -218,7 +216,6 @@ function RPLSeaUS2() {
 
           setMarkers(markerData);
         } else {
-          console.log('No marker data received');
         }
       } catch (err) {
         console.error('Error fetching marker data:', err);
