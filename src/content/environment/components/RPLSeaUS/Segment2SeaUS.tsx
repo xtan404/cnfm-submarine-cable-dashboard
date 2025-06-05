@@ -14,11 +14,13 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
-import { useCableCuts } from 'src/contexts/CableCutContext'; // Import the context hook
+import Swal from 'sweetalert2';
 
 // Define prop types for TypeScript
 interface Segment2SeaUSProps {
   handleClose?: () => void;
+  onCutAdded?: (cut: any) => void;
+  existingCuts?: any[];
 }
 
 // Validation schema
@@ -31,48 +33,172 @@ const validationSchema = Yup.object({
 });
 
 const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
-  handleClose: externalHandleClose
+  handleClose: externalHandleClose,
+  onCutAdded,
+  existingCuts = []
 }) => {
   const map = useMap();
   const cutMarkersRef = useRef({});
   const [cableData, setCableData] = useState([]);
+  const [markerData, setMarkerData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [processedCuts, setProcessedCuts] = useState([]);
 
-  // Use the context instead of local state
-  const { cuts, addCut } = useCableCuts();
+  // Replace context with local array state
+  const [cuts, setCuts] = useState(existingCuts);
 
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
 
-  // Fetch cable data from API
-  useEffect(() => {
-    const fetchCableData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${apiBaseUrl}${port}/sea-us-rpl-s2`);
-        if (!response.ok) {
-          throw new Error(`API request failed with status ${response.status}`);
-        }
-        const data = await response.json();
-        setCableData(data);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching cable data:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Function to add a new cut to the array
+  const addCut = (newCut) => {
+    setCuts((prevCuts) => {
+      const updatedCuts = [...prevCuts, newCut];
+      console.log('Updated cuts array:', updatedCuts);
+      return updatedCuts;
+    });
 
-    fetchCableData();
+    if (onCutAdded) {
+      onCutAdded(newCut);
+    }
+  };
+
+  // Fetch cable data from API
+  const fetchCableData = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${port}/sea-us-rpl-s2`);
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      const data = await response.json();
+      setCableData(data);
+      return data;
+    } catch (err) {
+      console.error('Error fetching cable data:', err);
+      setError(err.message);
+      throw err;
+    }
+  };
+
+  // Fetch marker data based on your reference
+  const fetchMarkerData = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${port}/fetch-cable-cuts`);
+      const result = await response.json();
+
+      if (Array.isArray(result) && result.length > 0) {
+        // Process marker data - filter for events containing "S2R" or "City"
+        const markers = result
+          .filter(
+            (item) =>
+              item.cut_type &&
+              typeof item.cut_type === 'string' &&
+              (item.cut_type.includes('Fiber') ||
+                item.cut_type.includes('Shunt') ||
+                item.cut_type.includes('Cut'))
+          )
+          .map((item) => ({
+            latitude: parseFloat(item.latitude),
+            longitude: parseFloat(item.longitude),
+            label: item.cut_type,
+            timestamp: item.simulated,
+            distance: parseFloat(item.distance) || 0,
+            depth: item.depth || 'Unknown'
+          }));
+
+        setMarkerData(markers);
+        return markers;
+      } else {
+        console.warn('No marker data found');
+        return [];
+      }
+    } catch (err) {
+      console.error('Error fetching marker data:', err);
+      throw err;
+    }
+  };
+
+  // Function to determine cut type based on marker label or other criteria
+  const determineCutType = (marker) => {
+    const label = marker.label.toLowerCase();
+
+    // You can customize this logic based on your requirements
+    if (label.includes('fault') || label.includes('shunt')) {
+      return 'Shunt Fault';
+    } else if (label.includes('partial') || label.includes('degraded')) {
+      return 'Partial Fiber Break';
+    } else if (label.includes('break') || label.includes('cut')) {
+      return 'Fiber Break';
+    } else if (label.includes('anchor') || label.includes('drag')) {
+      return 'Full Cut';
+    } else {
+      // Default cut type - you can randomize this or use other logic
+      const cutTypes = [
+        'Shunt Fault',
+        'Partial Fiber Break',
+        'Fiber Break',
+        'Full Cut'
+      ];
+      return cutTypes[Math.floor(Math.random() * cutTypes.length)];
+    }
+  };
+
+  // Process markers into cuts
+  const processMarkersIntoCuts = (markers) => {
+    const newCuts = markers.map((marker, index) => ({
+      id: `marker-cut-${Date.now()}-${index}`,
+      distance: marker.distance,
+      cutType: determineCutType(marker),
+      timestamp: marker.timestamp,
+      latitude: marker.latitude,
+      longitude: marker.longitude,
+      depth: marker.depth
+    }));
+
+    setProcessedCuts(newCuts);
+    return newCuts;
+  };
+
+  // Fetch all data and process cuts
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch both cable data and marker data
+      const [cableResult, markerResult] = await Promise.all([
+        fetchCableData(),
+        fetchMarkerData()
+      ]);
+
+      // Process markers into cuts
+      if (markerResult.length > 0) {
+        const newCuts = processMarkersIntoCuts(markerResult);
+
+        // Add all processed cuts to the cuts array
+        setCuts((prevCuts) => [...prevCuts, ...newCuts]);
+      }
+    } catch (err) {
+      console.error('Error fetching data:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchAllData();
   }, [apiBaseUrl, port]);
 
   // Display existing cuts on the map when component mounts or cuts change
   useEffect(() => {
-    cuts.forEach((cut) => {
-      displayCutOnMap(cut);
-    });
+    if (cableData.length > 0) {
+      cuts.forEach((cut) => {
+        displayCutOnMap(cut);
+      });
+    }
   }, [cuts, cableData, map]);
 
   // Function to find cable segments based on cut distance
@@ -185,7 +311,6 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
 
   // Create popup content
   const createPopupContent = (cut, markerStyle, cutPoint, depth) => {
-    const timestamp = new Date(cut.timestamp).toLocaleString();
     return `
         <div class="cable-cut-popup" style="font-family: Arial, sans-serif; width: 250px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden;">
           <div style="background-color: ${
@@ -219,7 +344,7 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
               </tr>
             </table>
             <div style="font-size: 11px; color: #777; text-align: right; margin-top: 8px; font-style: italic;">
-              Simulated: ${timestamp}
+              Simulated: ${new Date(cut.timestamp).toLocaleString()}
             </div>
           </div>
         </div>
@@ -230,10 +355,16 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
   const displayCutOnMap = (cut) => {
     if (!cableData || cableData.length === 0) return;
 
-    const { beforeCut, afterCut } = findCableSegmentsForCutDistance(
-      cut.distance
-    );
-    const cutPoint = calculateCutPoint(beforeCut, afterCut, cut.distance);
+    // For API-sourced cuts, use the coordinates directly if available
+    let cutPoint;
+    if (cut.latitude && cut.longitude) {
+      cutPoint = [cut.latitude, cut.longitude];
+    } else {
+      const { beforeCut, afterCut } = findCableSegmentsForCutDistance(
+        cut.distance
+      );
+      cutPoint = calculateCutPoint(beforeCut, afterCut, cut.distance);
+    }
 
     if (cutPoint) {
       if (cutMarkersRef.current[cut.id]) {
@@ -241,7 +372,7 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
       }
 
       const markerStyle = getMarkerStyle(cut.cutType);
-      const depth = beforeCut?.Depth || afterCut?.Depth || 'Unknown';
+      const depth = cut.depth || 'Unknown';
 
       cutMarkersRef.current[cut.id] = L.marker(cutPoint, {
         icon: L.divIcon({
@@ -277,51 +408,134 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
         depth
       );
 
-      cutMarkersRef.current[cut.id]
-        .bindPopup(popupContent, {
-          className: 'cable-cut-custom-popup',
-          maxWidth: 250,
-          minWidth: 250,
-          closeButton: false,
-          autoClose: false,
-          offset: [0, 0]
-        })
-        .openPopup();
+      cutMarkersRef.current[cut.id].bindPopup(popupContent, {
+        className: 'cable-cut-custom-popup',
+        maxWidth: 250,
+        minWidth: 250,
+        closeButton: false,
+        autoClose: false,
+        offset: [0, 0]
+      });
     }
   };
 
-  const handleCut = (values) => {
+  const handleCut = async (values) => {
     const { kmValue, cutType } = values;
     const { beforeCut, afterCut } = findCableSegmentsForCutDistance(kmValue);
     const cutPoint = calculateCutPoint(beforeCut, afterCut, kmValue);
 
-    if (cutPoint) {
-      const newCut = {
-        id: Date.now().toString(),
-        distance: Number(kmValue),
-        cutType: cutType,
-        timestamp: new Date().toISOString(),
-        latitude: cutPoint[0],
-        longitude: cutPoint[1],
-        depth: beforeCut?.Depth || afterCut?.Depth || 'Unknown'
+    externalHandleClose();
+
+    if (!cutPoint) {
+      console.error('Could not calculate cut point');
+      return Swal.fire({
+        icon: 'error',
+        title: 'Calculation Error',
+        text: 'Could not calculate cut point. Please check the distance value and try again.',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6'
+      });
+    }
+
+    const newCut = {
+      cut_id: `seaus2-${Date.now()}`,
+      distance: Number(kmValue),
+      cut_type: cutType,
+      simulated: new Date().toISOString(),
+      latitude: cutPoint[0],
+      longitude: cutPoint[1],
+      depth: beforeCut?.Depth || afterCut?.Depth || 'Unknown'
+    };
+
+    try {
+      const response = await fetch(`${apiBaseUrl}${port}/cable-cuts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newCut)
+      });
+
+      const result = await response.json();
+
+      // Handle different HTTP status codes
+      if (!response.ok) {
+        let errorMessage = 'An unexpected error occurred. Please try again.';
+        let errorTitle = 'Server Error';
+
+        switch (response.status) {
+          case 409:
+            errorTitle = 'Duplicate Entry';
+            errorMessage =
+              result.message || 'A cable cut at this location already exists.';
+            break;
+          case 500:
+            errorTitle = 'Server Error';
+            errorMessage =
+              'Internal server error. Please try again later or contact support.';
+            break;
+          default:
+            errorMessage =
+              result.message ||
+              `Server returned status ${response.status}. Please try again.`;
+        }
+
+        throw new Error(
+          JSON.stringify({ title: errorTitle, message: errorMessage })
+        );
+      }
+
+      // Success - close loading and show success message
+      const displayCut = {
+        id: newCut.cut_id,
+        distance: newCut.distance,
+        cutType: newCut.cut_type,
+        timestamp: newCut.simulated,
+        latitude: newCut.latitude,
+        longitude: newCut.longitude,
+        depth: newCut.depth
       };
 
-      // Use context to add the cut
-      addCut(newCut);
+      // Add to local state for immediate display
+      addCut(displayCut);
 
-      displayCutOnMap(newCut);
+      // Display on map
+      displayCutOnMap(displayCut);
 
+      // Fly to the cut location
       map.flyTo(cutPoint, 7.7, {
         animate: true,
         duration: 0.5
       });
+    } catch (error) {
+      console.error('Error saving cut:', error);
 
-      console.log('Zoomed to cut point:', cutPoint);
-    } else {
-      console.error('Could not calculate cut point');
+      let errorData;
+      try {
+        errorData = JSON.parse(error.message);
+      } catch {
+        errorData = {
+          title: 'Connection Error',
+          message:
+            'Unable to connect to the server. Please check your internet connection and try again.'
+        };
+      }
+
+      // Show error message
+      Swal.fire({
+        icon: 'error',
+        title: errorData.title,
+        text: errorData.message,
+        confirmButtonText: 'Try Again',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Optionally retry the operation
+          // handleCut(values);
+        }
+      });
     }
-
-    externalHandleClose();
   };
 
   const getCutTypeDescription = (cutType) => {

@@ -4,11 +4,13 @@ import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import Button from '@mui/material/Button';
+import Swal from 'sweetalert2';
 
 const ResetButton = () => {
   const map = useMap();
   const buttonContainerRef = useRef<HTMLDivElement | null>(null);
-  const cutMarkersRef = useRef<Record<string, L.Marker>>({});
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
+  const port = process.env.REACT_APP_PORT;
 
   useEffect(() => {
     // Remove default attribution control
@@ -34,15 +36,26 @@ const ResetButton = () => {
     // Cleanup function
     return () => {
       map.removeControl(customControl);
-      Object.values(cutMarkersRef.current).forEach((marker) => {
-        map.removeLayer(marker);
-      });
     };
   }, [map]);
 
   // Handle Dialog Open/Close
-  const handleReset = () => {
-    window.location.reload();
+  const handleReset = async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${port}/delete-cable-cuts`, {
+        method: 'DELETE'
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        throw new Error(result.message || 'Failed to clear data');
+      }
+    } catch (error) {
+      Swal.fire('Error!', error.message || 'Something went wrong', 'error');
+    }
   };
 
   // Only render the button if the container ref is available

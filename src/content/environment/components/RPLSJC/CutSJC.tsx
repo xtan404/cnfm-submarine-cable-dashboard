@@ -142,7 +142,7 @@ const CutSJC: React.FC<CutSJCProps> = ({ handleClose }) => {
             maxWidth="xl"
             fullWidth
           >
-            <DialogTitle>
+            <DialogTitle sx={{ mt: 3 }}>
               <Typography variant="h5">Simulate SJC Cable Cut</Typography>
             </DialogTitle>
             <Divider />
