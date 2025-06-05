@@ -100,6 +100,7 @@ const SegmentUpdate = () => {
 
   const handleUpload = async () => {
     // Validation
+    setOpen(false);
     if (!selectedCable) {
       Swal.fire('Missing Selection', 'Please select a cable', 'warning');
       return;
@@ -151,9 +152,7 @@ const SegmentUpdate = () => {
       }
 
       console.log('Response data:', data); // Debug log
-
       if (response.ok) {
-        setOpen(false);
         await Swal.fire({
           title: 'Success!',
           text: `File uploaded successfully to ${data.tableName}. ${data.recordsInserted} records inserted.`,
@@ -174,7 +173,7 @@ const SegmentUpdate = () => {
 
       await Swal.fire({
         title: 'Upload Failed',
-        text: err.message || 'Something went wrong during upload',
+        text: 'Server error during upload.',
         icon: 'error',
         confirmButtonText: 'OK'
       });
