@@ -6,20 +6,17 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
 import { CssBaseline } from '@mui/material';
 import ThemeProvider from './theme/ThemeProvider';
-import { CableCutProvider } from './contexts/CableCutContext';
 
 function App() {
   const content = useRoutes(router);
 
   return (
-    <CableCutProvider>
-      <ThemeProvider>
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <CssBaseline />
-          {content}
-        </LocalizationProvider>
-      </ThemeProvider>
-    </CableCutProvider>
+    <ThemeProvider>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <CssBaseline />
+        {content}
+      </LocalizationProvider>
+    </ThemeProvider>
   );
 }
 export default App;

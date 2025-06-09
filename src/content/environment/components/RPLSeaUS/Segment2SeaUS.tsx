@@ -55,7 +55,6 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
   const addCut = (newCut) => {
     setCuts((prevCuts) => {
       const updatedCuts = [...prevCuts, newCut];
-      console.log('Updated cuts array:', updatedCuts);
       return updatedCuts;
     });
 
@@ -88,15 +87,12 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
       const result = await response.json();
 
       if (Array.isArray(result) && result.length > 0) {
-        // Process marker data - filter for events containing "S2R" or "City"
         const markers = result
           .filter(
             (item) =>
-              item.cut_type &&
-              typeof item.cut_type === 'string' &&
-              (item.cut_type.includes('Fiber') ||
-                item.cut_type.includes('Shunt') ||
-                item.cut_type.includes('Cut'))
+              item.cut_id &&
+              typeof item.cut_id === 'string' &&
+              item.cut_id.includes('seaus2')
           )
           .map((item) => ({
             latitude: parseFloat(item.latitude),
@@ -118,6 +114,16 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
       throw err;
     }
   };
+
+  // useEffect for interval refresh
+  useEffect(() => {
+    let markerInterval: NodeJS.Timeout;
+
+    fetchMarkerData();
+    markerInterval = setInterval(fetchMarkerData, 2000);
+
+    return () => clearInterval(markerInterval);
+  }, [apiBaseUrl, port]);
 
   // Function to determine cut type based on marker label or other criteria
   const determineCutType = (marker) => {
@@ -316,7 +322,7 @@ const Segment2SeaUS: React.FC<Segment2SeaUSProps> = ({
           <div style="background-color: ${
             markerStyle.color
           }; color: white; padding: 8px; text-align: center; font-weight: bold; font-size: 14px; letter-spacing: 0.5px;">
-            ${cut.cutType.toUpperCase()} DETECTED
+            ${cut.cutType.toUpperCase()}
           </div>
           <div style="background-color: white; padding: 12px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 13px;">

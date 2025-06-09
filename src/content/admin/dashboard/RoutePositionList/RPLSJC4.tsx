@@ -260,7 +260,7 @@ function RPLSJC4() {
           key={`marker-${index}`}
           position={[marker.latitude, marker.longitude] as [number, number]}
           label={marker.label}
-          minZoom={9} // Set minimum zoom level to 5
+          minZoom={8} // Set minimum zoom level to 5
         />
       ))}
       {/* Define Cable Modal Dialog */}
