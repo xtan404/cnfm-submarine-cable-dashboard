@@ -426,7 +426,7 @@ const Segment8SJC: React.FC<Segment8SJCProps> = ({
   };
 
   const handleCut = async (values) => {
-    const { kmValue, cutType } = values;
+    const { kmValue, cutType, faultDate } = values;
     const { beforeCut, afterCut } = findCableSegmentsForCutDistance(kmValue);
     const cutPoint = calculateCutPoint(beforeCut, afterCut, kmValue);
 
@@ -447,6 +447,7 @@ const Segment8SJC: React.FC<Segment8SJCProps> = ({
       cut_id: `sjc8-${Date.now()}`,
       distance: Number(kmValue),
       cut_type: cutType,
+      fault_date: faultDate,
       simulated: new Date().toISOString(),
       latitude: cutPoint[0],
       longitude: cutPoint[1],
@@ -496,6 +497,7 @@ const Segment8SJC: React.FC<Segment8SJCProps> = ({
         id: newCut.cut_id,
         distance: newCut.distance,
         cutType: newCut.cut_type,
+        faultDate: newCut.fault_date,
         timestamp: newCut.simulated,
         latitude: newCut.latitude,
         longitude: newCut.longitude,
@@ -562,7 +564,7 @@ const Segment8SJC: React.FC<Segment8SJCProps> = ({
       <Divider />
       <DialogContent>
         <Formik
-          initialValues={{ kmValue: '', cutType: '' }}
+          initialValues={{ kmValue: '', cutType: '', faultDate: '' }}
           validationSchema={validationSchema}
           onSubmit={handleCut}
         >
@@ -587,6 +589,26 @@ const Segment8SJC: React.FC<Segment8SJCProps> = ({
                 error={touched.kmValue && Boolean(errors.kmValue)}
                 helperText={touched.kmValue && errors.kmValue}
               />
+
+              <Box sx={{ mt: 2 }}>
+                <TextField
+                  margin="dense"
+                  id="faultDate"
+                  name="faultDate"
+                  label="Fault Date"
+                  type="date"
+                  fullWidth
+                  variant="outlined"
+                  value={values.faultDate}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  error={touched.faultDate && Boolean(errors.faultDate)}
+                  helperText={touched.faultDate && errors.faultDate}
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                />
+              </Box>
 
               <Divider sx={{ my: 2 }} />
 

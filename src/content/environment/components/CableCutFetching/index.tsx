@@ -10,6 +10,7 @@ type MarkerData = {
   distance: number;
   depth?: string;
   simulated: string;
+  fault_date?: string;
 };
 
 type CableCutMarkersProps = {
@@ -51,7 +52,8 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
               cut_type: item.cut_type,
               distance: item.distance,
               depth: item.depth,
-              simulated: item.simulated
+              simulated: item.simulated,
+              fault_date: item.fault_date
             }));
         }
 
@@ -320,13 +322,16 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
             <tr>
               <td style="font-weight: bold; padding-bottom: 8px;">Fault Date:</td>
               <td style="text-align: right; padding-bottom: 8px;">${
-                cutPoint ? '' : ''
+                cut.fault_date
+                  ? new Date(cut.fault_date).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })
+                  : 'Not specified'
               }</td>
             </tr>
           </table>
-          <div style="font-size: 11px; color: #777; text-align: right; margin-top: 8px; font-style: italic;">
-            Simulated: ${new Date(cut.simulated).toLocaleString()}
-          </div>
         </div>
       </div>
     `;
