@@ -22,7 +22,83 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
   const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const [canDelete, setCanDelete] = useState<boolean>(false);
   const markersRef = useRef<{ [key: string]: L.Marker }>({});
+
+  // Effect to check permissions on component mount and localStorage changes
+  useEffect(() => {
+    const checkPermissions = () => {
+      setCanDelete(canDeleteMarkers());
+    };
+
+    // Check permissions initially
+    checkPermissions();
+
+    // Listen for storage events (when localStorage changes in other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'loggedIn' || e.key === 'user_role') {
+        checkPermissions();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Optional: Also listen for custom events if you update localStorage in the same tab
+    const handleCustomStorageUpdate = () => {
+      checkPermissions();
+    };
+
+    window.addEventListener('localStorageUpdate', handleCustomStorageUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener(
+        'localStorageUpdate',
+        handleCustomStorageUpdate
+      );
+    };
+  }, []);
+
+  // Function to handle marker removal
+  const removeMarker = async (cutId: string) => {
+    try {
+      // Make API call to delete from backend
+      const response = await fetch(
+        `${apiBaseUrl}${port}/delete-single-cable-cuts/${cutId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to delete cable cut');
+      }
+
+      // Remove from local state only if backend deletion was successful
+      setMarkers((prevMarkers) =>
+        prevMarkers.filter((marker) => marker.cut_id !== cutId)
+      );
+
+      // Remove from map immediately
+      if (markersRef.current[cutId]) {
+        map.removeLayer(markersRef.current[cutId]);
+        delete markersRef.current[cutId];
+      }
+    } catch (error) {
+      console.error('Error removing marker:', error);
+      // Optional: Show user-friendly error message
+      alert(
+        `Failed to remove marker: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`
+      );
+    }
+  };
 
   // Fetch polyline and marker data
   useEffect(() => {
@@ -197,6 +273,18 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
             popupElement.addEventListener('mouseleave', () => {
               this.closePopup();
             });
+
+            // Add click event listener for delete button (only if user can delete)
+            if (canDelete) {
+              const deleteButton =
+                popupElement.querySelector('.delete-marker-btn');
+              if (deleteButton) {
+                deleteButton.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  removeMarker(markerData.cut_id);
+                });
+              }
+            }
           }
         });
 
@@ -240,6 +328,26 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
     };
   }, [map]);
 
+  // Helper function to check if user can delete markers
+  const canDeleteMarkers = () => {
+    try {
+      // Check if user is logged in
+      const isLoggedIn = localStorage.getItem('loggedIn') === 'true';
+      if (!isLoggedIn) return false;
+
+      // Get user role from localStorage
+      const userRole = localStorage.getItem('user_role');
+      if (!userRole) return false;
+
+      // Define roles that can delete markers
+      const allowedRoles = ['administrator', 'simulator'];
+      return allowedRoles.includes(userRole.toLowerCase());
+    } catch (error) {
+      // Handle cases where localStorage is not available or throws an error
+      console.error('Error accessing localStorage:', error);
+      return false;
+    }
+  };
   // Helper functions moved to component level
   const getMarkerStyle = (cutType: string) => {
     const styles = {
@@ -277,6 +385,24 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
         .cable-cut-custom-popup-${cableSegment} .leaflet-popup-tip { display: none; }
         .cable-cut-custom-popup-${cableSegment} .leaflet-popup-close-button { display: none; }
         .cable-cut-custom-popup-${cableSegment}.leaflet-popup { margin-bottom: 0; }
+        .delete-marker-btn {
+          background-color: #dc3545;
+          color: white;
+          border: none;
+          padding: 8px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: bold;
+          transition: background-color 0.2s;
+          width: 100%;
+        }
+        .delete-marker-btn:hover {
+          background-color: #c82333;
+        }
+        .delete-marker-btn:active {
+          background-color: #bd2130;
+        }
       `;
       document.head.appendChild(style);
     }
@@ -333,6 +459,17 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
             </tr>
           </table>
         </div>
+        ${
+          canDelete
+            ? `
+        <div style="background-color: #f8f9fa; padding: 12px; border-top: 1px solid #dee2e6;">
+          <button class="delete-marker-btn" data-cut-id="${cut.cut_id}">
+            Delete
+          </button>
+        </div>
+        `
+            : ''
+        }
       </div>
     `;
   };
