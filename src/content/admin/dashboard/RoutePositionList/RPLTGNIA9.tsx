@@ -13,6 +13,7 @@ import {
 } from '@mui/material';
 import { Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import CableCutMarkers from 'src/content/environment/components/CableCutFetching';
 
 type DynamicMarkerProps = {
   position: [number, number];
@@ -264,6 +265,7 @@ function RPLTGNIA9() {
 
   return (
     <>
+      <CableCutMarkers cableSegment="tgnia9" />
       {/* Polyline Path */}
       <Polyline
         positions={positions}

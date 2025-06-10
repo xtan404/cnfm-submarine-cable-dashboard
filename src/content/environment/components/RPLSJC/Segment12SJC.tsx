@@ -444,7 +444,7 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
     }
 
     const newCut = {
-      cut_id: `seaus1-${Date.now()}`,
+      cut_id: `sjc12-${Date.now()}`,
       distance: Number(kmValue),
       cut_type: cutType,
       simulated: new Date().toISOString(),

@@ -156,13 +156,46 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
           depth
         );
 
-        marker.bindPopup(popupContent, {
+        // Create and bind the popup with hover-friendly options
+        const popup = L.popup({
           className: `cable-cut-custom-popup-${cableSegment}`,
           maxWidth: 250,
           minWidth: 250,
           closeButton: false,
           autoClose: false,
+          closeOnClick: false,
           offset: [0, 0]
+        }).setContent(popupContent);
+
+        marker.bindPopup(popup);
+
+        // Add hover event listeners
+        marker.on('mouseover', function (e) {
+          this.openPopup();
+        });
+
+        marker.on('mouseout', function (e) {
+          // Small delay to prevent flickering when moving mouse between marker and popup
+          setTimeout(() => {
+            const popupElement = this.getPopup().getElement();
+            if (!popupElement?.matches(':hover')) {
+              this.closePopup();
+            }
+          }, 100);
+        });
+
+        // Keep popup open when hovering over the popup itself
+        marker.on('popupopen', function (e) {
+          const popupElement = this.getPopup().getElement();
+          if (popupElement) {
+            popupElement.addEventListener('mouseenter', () => {
+              // Keep popup open
+            });
+
+            popupElement.addEventListener('mouseleave', () => {
+              this.closePopup();
+            });
+          }
         });
 
         // Add to map and store reference
@@ -282,6 +315,12 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
               <td style="font-weight: bold; padding-bottom: 8px;">Longitude:</td>
               <td style="text-align: right; padding-bottom: 8px;">${
                 cutPoint ? Number(cutPoint[1]).toFixed(6) : ''
+              }</td>
+            </tr>
+            <tr>
+              <td style="font-weight: bold; padding-bottom: 8px;">Fault Date:</td>
+              <td style="text-align: right; padding-bottom: 8px;">${
+                cutPoint ? '' : ''
               }</td>
             </tr>
           </table>
