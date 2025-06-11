@@ -1,26 +1,10 @@
-import { useContext } from 'react';
-
-import {
-  Box,
-  alpha,
-  Stack,
-  lighten,
-  Divider,
-  IconButton,
-  Tooltip,
-  styled,
-  useTheme,
-  Button
-} from '@mui/material';
-
-import HeaderUserbox from './Userbox';
-import HeaderMenu from './Menu';
+import { Box, alpha, lighten, styled, useTheme, Button } from '@mui/material';
 
 const HeaderWrapper = styled(Box)(
   ({ theme }) => `
         height: ${theme.header.height};
         color: ${theme.header.textColor};
-        padding: ${theme.spacing(0, 3)};
+        padding: ${theme.spacing(0, 5)};
         right: 0;
         z-index: 6;
         background-color: ${alpha(theme.header.background, 0.95)};
@@ -31,6 +15,22 @@ const HeaderWrapper = styled(Box)(
         @media (min-width: ${theme.breakpoints.values.lg}px) {
            
         }
+`
+);
+
+const LogoWrapper = styled(Box)(
+  ({ theme }) => `
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing(2.5)};
+    
+    img {
+      height: auto;
+      max-height: ${theme.spacing(10)};
+      width: auto;
+      max-width: ${theme.spacing(18)};
+      object-fit: contain;
+    }
 `
 );
 
@@ -57,12 +57,10 @@ function Header() {
               )}`
       }}
     >
-      <Stack
-        direction="row"
-        divider={<Divider orientation="vertical" flexItem />}
-        alignItems="center"
-        spacing={2}
-      ></Stack>
+      <LogoWrapper>
+        <img alt="Globe Telco Logo" src="/images/logos/GlobeLogoDark.png" />
+      </LogoWrapper>
+
       <Box display="flex" alignItems="center">
         <Button
           variant="outlined"

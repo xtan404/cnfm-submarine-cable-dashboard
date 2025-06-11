@@ -15,10 +15,10 @@ import React, { useEffect, useState } from 'react';
 import UserCableMap from './UserCableMap';
 
 const legendItems = [
-  { name: 'SJC', color: 'blue' },
-  { name: 'C2C', color: 'orange' },
   { name: 'TGN-IA', color: 'yellow' },
-  { name: 'SEA-US', color: 'green' }
+  { name: 'SJC', color: 'blue' },
+  { name: 'SEA-US', color: 'green' },
+  { name: 'C2C', color: 'orange' }
 ];
 
 function UserDashboard() {

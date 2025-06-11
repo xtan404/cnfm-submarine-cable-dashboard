@@ -351,21 +351,18 @@ function CableCutMarkers({ cableSegment }: CableCutMarkersProps) {
   // Helper functions moved to component level
   const getMarkerStyle = (cutType: string) => {
     const styles = {
-      'Shunt Fault': { color: '#FFA726', size: 20, borderColor: 'white' },
+      'Shunt Fault': { color: '#FBC02D', size: 20, borderColor: 'white' }, // Darker Yellow
       'Partial Fiber Break': {
-        color: '#EF5350',
+        color: '#FF6600',
         size: 20,
         borderColor: 'white'
-      },
-      'Fiber Break': { color: '#B71C1C', size: 20, borderColor: 'white' },
-      'Full Cut': { color: '#6A1B9A', size: 20, borderColor: 'white' }
+      }, // Orange
+      'Fiber Break': { color: '#F44336', size: 20, borderColor: 'white' }, // Red
+      'Full Cut': { color: '#B71C1C', size: 20, borderColor: 'white' } // Maroon
     };
+
     return (
-      styles[cutType as keyof typeof styles] || {
-        color: 'red',
-        size: 20,
-        borderColor: 'white'
-      }
+      styles[cutType] || { color: '#9E9E9E', size: 20, borderColor: 'white' }
     );
   };
 
