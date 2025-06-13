@@ -48,11 +48,25 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
   // Replace context with local array state
   const [cuts, setCuts] = useState(existingCuts);
 
+  // Add refs to track component mount status and cleanup
+  const isMountedRef = useRef(true);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const apiBaseUrl = process.env.REACT_APP_API_BASE_URL;
   const port = process.env.REACT_APP_PORT;
 
+  // Function to safely update state only if component is mounted
+  const safeSetState = (setter: Function, value: any) => {
+    if (isMountedRef.current) {
+      setter(value);
+    }
+  };
+
   // Function to add a new cut to the array
   const addCut = (newCut) => {
+    if (!isMountedRef.current) return;
+
     setCuts((prevCuts) => {
       const updatedCuts = [...prevCuts, newCut];
       return updatedCuts;
@@ -63,27 +77,51 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
     }
   };
 
-  // Fetch cable data from API
+  // Fetch cable data from API with abort controller
   const fetchCableData = async () => {
     try {
-      const response = await fetch(`${apiBaseUrl}${port}/sjc-rpl-s12`);
+      // Create new abort controller for this request
+      abortControllerRef.current = new AbortController();
+
+      const response = await fetch(`${apiBaseUrl}${port}/sjc-rpl-s12`, {
+        signal: abortControllerRef.current.signal
+      });
+
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
+
       const data = await response.json();
-      setCableData(data);
+
+      // Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setCableData(data);
+      }
+
       return data;
     } catch (err) {
+      // Don't update state if the error is due to abortion (component unmounted)
+      if (err.name === 'AbortError') {
+        console.log('Fetch cable data aborted');
+        return;
+      }
+
       console.error('Error fetching cable data:', err);
-      setError(err.message);
+      safeSetState(setError, err.message);
       throw err;
     }
   };
 
-  // Fetch marker data based on your reference
+  // Fetch marker data based on your reference with abort controller
   const fetchMarkerData = async () => {
     try {
-      const response = await fetch(`${apiBaseUrl}${port}/fetch-cable-cuts`);
+      // Create new abort controller for this request
+      abortControllerRef.current = new AbortController();
+
+      const response = await fetch(`${apiBaseUrl}${port}/fetch-cable-cuts`, {
+        signal: abortControllerRef.current.signal
+      });
+
       const result = await response.json();
 
       if (Array.isArray(result) && result.length > 0) {
@@ -103,26 +141,62 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
             depth: item.depth || 'Unknown'
           }));
 
-        setMarkerData(markers);
+        // Only update state if component is still mounted
+        if (isMountedRef.current) {
+          setMarkerData(markers);
+        }
+
         return markers;
       } else {
-        console.warn('No marker data found');
         return [];
       }
     } catch (err) {
+      // Don't update state if the error is due to abortion (component unmounted)
+      if (err.name === 'AbortError') {
+        console.log('Fetch marker data aborted');
+        return [];
+      }
+
       console.error('Error fetching marker data:', err);
       throw err;
     }
   };
 
-  // useEffect for interval refresh
+  // useEffect for interval refresh with proper cleanup
   useEffect(() => {
-    let markerInterval: NodeJS.Timeout;
+    const startMarkerDataFetching = async () => {
+      try {
+        await fetchMarkerData();
 
-    fetchMarkerData();
-    markerInterval = setInterval(fetchMarkerData, 2000);
+        // Only set interval if component is still mounted
+        if (isMountedRef.current) {
+          intervalRef.current = setInterval(async () => {
+            if (isMountedRef.current) {
+              try {
+                await fetchMarkerData();
+              } catch (error) {
+                console.error('Error in interval fetch:', error);
+              }
+            }
+          }, 2000);
+        }
+      } catch (error) {
+        console.error('Error in initial marker data fetch:', error);
+      }
+    };
 
-    return () => clearInterval(markerInterval);
+    startMarkerDataFetching();
+
+    // Cleanup function
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
   }, [apiBaseUrl, port]);
 
   // Function to determine cut type based on marker label or other criteria
@@ -162,15 +236,17 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
       depth: marker.depth
     }));
 
-    setProcessedCuts(newCuts);
+    safeSetState(setProcessedCuts, newCuts);
     return newCuts;
   };
 
-  // Fetch all data and process cuts
+  // Fetch all data and process cuts with proper error handling
   const fetchAllData = async () => {
+    if (!isMountedRef.current) return;
+
     try {
-      setLoading(true);
-      setError(null);
+      safeSetState(setLoading, true);
+      safeSetState(setError, null);
 
       // Fetch both cable data and marker data
       const [cableResult, markerResult] = await Promise.all([
@@ -178,18 +254,25 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
         fetchMarkerData()
       ]);
 
+      // Only proceed if component is still mounted
+      if (!isMountedRef.current) return;
+
       // Process markers into cuts
-      if (markerResult.length > 0) {
+      if (markerResult && markerResult.length > 0) {
         const newCuts = processMarkersIntoCuts(markerResult);
 
         // Add all processed cuts to the cuts array
         setCuts((prevCuts) => [...prevCuts, ...newCuts]);
       }
     } catch (err) {
+      if (!isMountedRef.current) return;
+
       console.error('Error fetching data:', err);
-      setError(err.message);
+      safeSetState(setError, err.message);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -200,12 +283,42 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
 
   // Display existing cuts on the map when component mounts or cuts change
   useEffect(() => {
-    if (cableData.length > 0) {
+    if (cableData.length > 0 && isMountedRef.current) {
       cuts.forEach((cut) => {
         displayCutOnMap(cut);
       });
     }
   }, [cuts, cableData, map]);
+
+  // Cleanup effect to handle component unmounting
+  useEffect(() => {
+    return () => {
+      // Mark component as unmounted
+      isMountedRef.current = false;
+
+      // Clear interval
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+
+      // Abort any ongoing fetch requests
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+
+      // Clean up map markers
+      Object.values(cutMarkersRef.current).forEach((marker: any) => {
+        if (map && marker) {
+          try {
+            map.removeLayer(marker);
+          } catch (error) {
+            console.warn('Error removing marker:', error);
+          }
+        }
+      });
+      cutMarkersRef.current = {};
+    };
+  }, [map]);
 
   // Function to find cable segments based on cut distance
   const findCableSegmentsForCutDistance = (distance) => {
@@ -359,7 +472,7 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
 
   // Function to display a cut on the map
   const displayCutOnMap = (cut) => {
-    if (!cableData || cableData.length === 0) return;
+    if (!cableData || cableData.length === 0 || !isMountedRef.current) return;
 
     // For API-sourced cuts, use the coordinates directly if available
     let cutPoint;
@@ -372,65 +485,77 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
       cutPoint = calculateCutPoint(beforeCut, afterCut, cut.distance);
     }
 
-    if (cutPoint) {
+    if (cutPoint && map) {
       if (cutMarkersRef.current[cut.id]) {
-        map.removeLayer(cutMarkersRef.current[cut.id]);
+        try {
+          map.removeLayer(cutMarkersRef.current[cut.id]);
+        } catch (error) {
+          console.warn('Error removing existing marker:', error);
+        }
       }
 
       const markerStyle = getMarkerStyle(cut.cutType);
       const depth = cut.depth || 'Unknown';
 
-      cutMarkersRef.current[cut.id] = L.marker(cutPoint, {
-        icon: L.divIcon({
-          className: `cut-marker-${cut.cutType}`,
-          html: `
-              <div style="
-                position: relative;
-                width: ${markerStyle.size}px; 
-                height: ${markerStyle.size}px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              ">
+      try {
+        cutMarkersRef.current[cut.id] = L.marker(cutPoint, {
+          icon: L.divIcon({
+            className: `cut-marker-${cut.cutType}`,
+            html: `
                 <div style="
-                  color: ${markerStyle.color};
-                  font-size: ${markerStyle.size - 4}px;
-                  font-weight: bold;
-                  text-shadow: 1px 1px 2px rgba(0,0,0,0.8), -1px -1px 2px rgba(255,255,255,0.8);
-                  line-height: 1;
-                ">✕</div>
-              </div>
-            `,
-          iconSize: [markerStyle.size, markerStyle.size],
-          iconAnchor: [markerStyle.size / 2, markerStyle.size / 2]
-        })
-      }).addTo(map);
+                  position: relative;
+                  width: ${markerStyle.size}px; 
+                  height: ${markerStyle.size}px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                ">
+                  <div style="
+                    color: ${markerStyle.color};
+                    font-size: ${markerStyle.size - 4}px;
+                    font-weight: bold;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.8), -1px -1px 2px rgba(255,255,255,0.8);
+                    line-height: 1;
+                  ">✕</div>
+                </div>
+              `,
+            iconSize: [markerStyle.size, markerStyle.size],
+            iconAnchor: [markerStyle.size / 2, markerStyle.size / 2]
+          })
+        }).addTo(map);
 
-      addPopupStyles();
-      const popupContent = createPopupContent(
-        cut,
-        markerStyle,
-        cutPoint,
-        depth
-      );
+        addPopupStyles();
+        const popupContent = createPopupContent(
+          cut,
+          markerStyle,
+          cutPoint,
+          depth
+        );
 
-      cutMarkersRef.current[cut.id].bindPopup(popupContent, {
-        className: 'cable-cut-custom-popup',
-        maxWidth: 250,
-        minWidth: 250,
-        closeButton: false,
-        autoClose: false,
-        offset: [0, 0]
-      });
+        cutMarkersRef.current[cut.id].bindPopup(popupContent, {
+          className: 'cable-cut-custom-popup',
+          maxWidth: 250,
+          minWidth: 250,
+          closeButton: false,
+          autoClose: false,
+          offset: [0, 0]
+        });
+      } catch (error) {
+        console.error('Error creating marker:', error);
+      }
     }
   };
 
   const handleCut = async (values) => {
+    if (!isMountedRef.current) return;
+
     const { kmValue, cutType, faultDate } = values;
     const { beforeCut, afterCut } = findCableSegmentsForCutDistance(kmValue);
     const cutPoint = calculateCutPoint(beforeCut, afterCut, kmValue);
 
-    externalHandleClose();
+    if (externalHandleClose) {
+      externalHandleClose();
+    }
 
     if (!cutPoint) {
       console.error('Could not calculate cut point');
@@ -455,12 +580,16 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
     };
 
     try {
+      // Create new abort controller for this request
+      const controller = new AbortController();
+
       const response = await fetch(`${apiBaseUrl}${port}/cable-cuts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(newCut)
+        body: JSON.stringify(newCut),
+        signal: controller.signal
       });
 
       const result = await response.json();
@@ -492,6 +621,9 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
         );
       }
 
+      // Only proceed if component is still mounted
+      if (!isMountedRef.current) return;
+
       // Success - close loading and show success message
       const displayCut = {
         id: newCut.cut_id,
@@ -511,11 +643,15 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
       displayCutOnMap(displayCut);
 
       // Fly to the cut location
-      map.flyTo(cutPoint, 7.7, {
-        animate: true,
-        duration: 0.5
-      });
+      if (map && isMountedRef.current) {
+        map.flyTo(cutPoint, 7.7, {
+          animate: true,
+          duration: 0.5
+        });
+      }
     } catch (error) {
+      if (!isMountedRef.current) return;
+
       console.error('Error saving cut:', error);
 
       let errorData;
@@ -661,7 +797,10 @@ const Segment12SJC: React.FC<Segment12SJCProps> = ({
               </Box>
 
               <DialogActions>
-                <Button onClick={() => externalHandleClose()} color="primary">
+                <Button
+                  onClick={() => externalHandleClose && externalHandleClose()}
+                  color="primary"
+                >
                   Cancel
                 </Button>
                 <Button

@@ -206,7 +206,8 @@ function AdminDashboard() {
                       <Box sx={{ flexGrow: 1 }} />
                       <Box>
                         <Typography variant="body2">
-                          Last Updated: {lastUpdate || 'No Updates Found'}
+                          Last Utilization Update:{' '}
+                          {lastUpdate || 'No Updates Found'}
                         </Typography>
                       </Box>
                       {/* Clear Old Data Button */}

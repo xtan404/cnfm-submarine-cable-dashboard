@@ -12,6 +12,7 @@ import Header from './components/Header';
 import UserDashboard from './content/user';
 import ViewerLayout from './layouts/ViewerLayout';
 import SimulatorDashboard from './content/simulator';
+import ChangePassword from './content/authentication/change-password';
 
 const Loader = (Component) => (props) =>
   (
@@ -52,6 +53,10 @@ const routes: RouteObject[] = [
       { path: '/', element: <Navigate to="home" replace /> },
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
+      {
+        path: 'change-password',
+        element: <PrivateRoute element={ChangePassword} />
+      },
       {
         path: 'status',
         children: [

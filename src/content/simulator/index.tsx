@@ -203,7 +203,8 @@ function SimulatorDashboard() {
                       <Box sx={{ flexGrow: 1 }} />
                       <Box>
                         <Typography variant="body2">
-                          Last Updated: {lastUpdate || 'No Updates Found'}
+                          Last utilization Update:{' '}
+                          {lastUpdate || 'No Updates Found'}
                         </Typography>
                       </Box>
                     </Box>

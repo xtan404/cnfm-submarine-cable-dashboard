@@ -130,17 +130,17 @@ function HeaderUserbox() {
             </UserBoxDescription>
           </UserBoxText>
         </MenuUserBox>
-        {/* <Divider sx={{ mb: 0 }} />
+        <Divider sx={{ mb: 0 }} />
         <List sx={{ p: 1 }} component="nav">
           <ListItem button to="/change-password" component={NavLink}>
             <PasswordIcon fontSize="small" />
             <ListItemText primary="Change Password" />
           </ListItem>
-          <ListItem button to="/manage-accounts" component={NavLink}>
+          {/* <ListItem button to="/manage-accounts" component={NavLink}>
             <ManageAccountsIcon fontSize="small" />
             <ListItemText primary="Manage Accounts" />
-          </ListItem>
-        </List> */}
+          </ListItem>*/}
+        </List>
         <Divider />
         <Box sx={{ m: 1 }}>
           <Button color="primary" fullWidth onClick={handleSignOut}>

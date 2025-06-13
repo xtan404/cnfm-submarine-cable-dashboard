@@ -148,7 +148,6 @@ const Segment1SeaUS: React.FC<Segment1SeaUSProps> = ({
 
         return markers;
       } else {
-        console.warn('No marker data found');
         return [];
       }
     } catch (err) {

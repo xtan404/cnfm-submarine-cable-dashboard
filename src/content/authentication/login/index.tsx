@@ -112,7 +112,20 @@ const LoginPage = () => {
         console.log(response.data.user_role, 'Login Successful!');
         axios.defaults.headers.common['Authorization'] = response.data.user_id;
 
-        // ✅ SweetAlert for successful login
+        // Check if user role is 'User' and deny dashboard access
+        if (response.data.user_role === 'User') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Access Denied',
+            text: 'The account you entered does not have access to the dashboard. Redirecting back to home page.',
+            confirmButtonColor: '#3854A5'
+          }).then(() => {
+            navigate('/home');
+          });
+          return; // Exit early to prevent further navigation logic
+        }
+
+        // ✅ SweetAlert for successful login (for authorized roles)
         Swal.fire({
           icon: 'success',
           title: 'Login Successful',
