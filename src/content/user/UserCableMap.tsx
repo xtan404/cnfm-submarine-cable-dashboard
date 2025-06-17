@@ -272,31 +272,6 @@ const UserCableMap = () => {
           </Typography>
           <Typography variant="h4" color="black">
             {ipopUtilization}
-            {parseFloat(ipopDifference) !== 0 && (
-              <Box
-                sx={(theme) => {
-                  const diff = parseFloat(ipopDifference);
-
-                  return {
-                    display: 'inline-block',
-                    padding: '2px 10px',
-                    borderRadius: '999px',
-                    fontWeight: 'bold',
-                    fontSize: '14px',
-                    backgroundColor:
-                      diff < 0
-                        ? theme.colors.error.lighter
-                        : theme.colors.success.lighter,
-                    color:
-                      diff < 0
-                        ? theme.colors.error.main
-                        : theme.colors.success.main
-                  };
-                }}
-              >
-                {ipopDifference}
-              </Box>
-            )}
           </Typography>
         </Box>
         {/* Dynamic Hoverable Dot Markers*/}

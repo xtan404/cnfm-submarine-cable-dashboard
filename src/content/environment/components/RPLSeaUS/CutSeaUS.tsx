@@ -12,48 +12,18 @@ import {
   Box,
   Divider,
   CardContent,
-  Tab,
-  Tabs
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent
 } from '@mui/material';
 import Segment1SeaUS from './Segment1SeaUS';
 import Segment2SeaUS from './Segment2SeaUS';
 import Segment3SeaUS from './Segment3SeaUS';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
 interface CutSeaUSProps {
   handleClose?: () => void;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ pt: 1 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`
-  };
 }
 
 const CutSeaUS: React.FC<CutSeaUSProps> = ({ handleClose }) => {
@@ -61,7 +31,7 @@ const CutSeaUS: React.FC<CutSeaUSProps> = ({ handleClose }) => {
   const buttonContainerRef = useRef<HTMLDivElement | null>(null);
   const cutMarkersRef = useRef<Record<string, L.Marker>>({});
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(0);
+  const [selectedSegment, setSelectedSegment] = useState<number>(1);
 
   useEffect(() => {
     // Remove default attribution control
@@ -93,8 +63,9 @@ const CutSeaUS: React.FC<CutSeaUSProps> = ({ handleClose }) => {
     };
   }, [map]);
 
-  const handleChange = (event: SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  // Handle dropdown change
+  const handleSegmentChange = (event: SelectChangeEvent<number>) => {
+    setSelectedSegment(event.target.value as number);
   };
 
   // Handle Dialog Open/Close
@@ -105,6 +76,20 @@ const CutSeaUS: React.FC<CutSeaUSProps> = ({ handleClose }) => {
     setOpen(false);
     if (handleClose) {
       handleClose();
+    }
+  };
+
+  // Render the appropriate segment component based on selection
+  const renderSegmentComponent = () => {
+    switch (selectedSegment) {
+      case 1:
+        return <Segment1SeaUS handleClose={handleDialogClose} />;
+      case 2:
+        return <Segment2SeaUS handleClose={handleDialogClose} />;
+      case 3:
+        return <Segment3SeaUS handleClose={handleDialogClose} />;
+      default:
+        return <Segment1SeaUS handleClose={handleDialogClose} />;
     }
   };
 
@@ -140,28 +125,25 @@ const CutSeaUS: React.FC<CutSeaUSProps> = ({ handleClose }) => {
             <Divider />
             <CardContent>
               <Box sx={{ width: '100%' }}>
-                <Tabs
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  textColor="primary"
-                  indicatorColor="primary"
-                  value={value}
-                  onChange={handleChange}
-                  aria-label="basic tabs example"
-                >
-                  <Tab label="Segment 1" {...a11yProps(0)} />
-                  <Tab label="Segment 2" {...a11yProps(1)} />
-                  <Tab label="Segment 3" {...a11yProps(2)} />
-                </Tabs>
-                <TabPanel value={value} index={0}>
-                  <Segment1SeaUS handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                  <Segment2SeaUS handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={2}>
-                  <Segment3SeaUS handleClose={handleDialogClose} />
-                </TabPanel>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <InputLabel id="segment-select-label">
+                    Select Segment
+                  </InputLabel>
+                  <Select
+                    labelId="segment-select-label"
+                    id="segment-select"
+                    value={selectedSegment}
+                    label="Select Segment"
+                    onChange={handleSegmentChange}
+                  >
+                    <MenuItem value={1}>Segment 1 | Kauditan - BU</MenuItem>
+                    <MenuItem value={2}>Segment 2 | Davao - BU</MenuItem>
+                    <MenuItem value={3}>Segment 3 | Piti - BU</MenuItem>
+                  </Select>
+                </FormControl>
+
+                {/* Render the selected segment component */}
+                {renderSegmentComponent()}
               </Box>
             </CardContent>
           </Dialog>

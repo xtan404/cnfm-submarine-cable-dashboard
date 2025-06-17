@@ -12,8 +12,11 @@ import {
   Box,
   Divider,
   CardContent,
-  Tab,
-  Tabs
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent
 } from '@mui/material';
 import Segment1TGNIA from './Segment1TGNIA';
 import Segment2TGNIA from './Segment2TGNIA';
@@ -28,41 +31,8 @@ import Segment10TGNIA from './Segment10TGNIA';
 import Segment11TGNIA from './Segment11TGNIA';
 import Segment12TGNIA from './Segment12TGNIA';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
 interface CutTGNIAProps {
   handleClose?: () => void;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ pt: 1 }}>
-          <Typography>{children}</Typography>
-        </Box>
-      )}
-    </div>
-  );
-}
-
-function a11yProps(index: number) {
-  return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`
-  };
 }
 
 const CutTGNIA: React.FC<CutTGNIAProps> = ({ handleClose }) => {
@@ -70,7 +40,7 @@ const CutTGNIA: React.FC<CutTGNIAProps> = ({ handleClose }) => {
   const buttonContainerRef = useRef<HTMLDivElement | null>(null);
   const cutMarkersRef = useRef<Record<string, L.Marker>>({});
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(0);
+  const [selectedSegment, setSelectedSegment] = useState<number>(1);
 
   useEffect(() => {
     // Remove default attribution control
@@ -102,8 +72,9 @@ const CutTGNIA: React.FC<CutTGNIAProps> = ({ handleClose }) => {
     };
   }, [map]);
 
-  const handleChange = (event: SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  // Handle dropdown change
+  const handleSegmentChange = (event: SelectChangeEvent<number>) => {
+    setSelectedSegment(event.target.value as number);
   };
 
   // Handle Dialog Open/Close
@@ -114,6 +85,38 @@ const CutTGNIA: React.FC<CutTGNIAProps> = ({ handleClose }) => {
     setOpen(false);
     if (handleClose) {
       handleClose();
+    }
+  };
+
+  // Render the appropriate segment component based on selection
+  const renderSegmentComponent = () => {
+    switch (selectedSegment) {
+      case 1:
+        return <Segment1TGNIA handleClose={handleDialogClose} />;
+      case 2:
+        return <Segment2TGNIA handleClose={handleDialogClose} />;
+      case 3:
+        return <Segment3TGNIA handleClose={handleDialogClose} />;
+      case 4:
+        return <Segment4TGNIA handleClose={handleDialogClose} />;
+      case 5:
+        return <Segment5TGNIA handleClose={handleDialogClose} />;
+      case 6:
+        return <Segment6TGNIA handleClose={handleDialogClose} />;
+      case 7:
+        return <Segment7TGNIA handleClose={handleDialogClose} />;
+      case 8:
+        return <Segment8TGNIA handleClose={handleDialogClose} />;
+      case 9:
+        return <Segment9TGNIA handleClose={handleDialogClose} />;
+      case 10:
+        return <Segment10TGNIA handleClose={handleDialogClose} />;
+      case 11:
+        return <Segment11TGNIA handleClose={handleDialogClose} />;
+      case 12:
+        return <Segment12TGNIA handleClose={handleDialogClose} />;
+      default:
+        return <Segment1TGNIA handleClose={handleDialogClose} />;
     }
   };
 
@@ -140,7 +143,7 @@ const CutTGNIA: React.FC<CutTGNIAProps> = ({ handleClose }) => {
           <Dialog
             open={open}
             onClose={handleDialogClose}
-            maxWidth="xl"
+            maxWidth="sm"
             fullWidth
           >
             <DialogTitle sx={{ mt: 3 }}>
@@ -149,64 +152,44 @@ const CutTGNIA: React.FC<CutTGNIAProps> = ({ handleClose }) => {
             <Divider />
             <CardContent>
               <Box sx={{ width: '100%' }}>
-                <Tabs
-                  variant="scrollable"
-                  scrollButtons="auto"
-                  textColor="primary"
-                  indicatorColor="primary"
-                  value={value}
-                  onChange={handleChange}
-                  aria-label="basic tabs example"
-                >
-                  <Tab label="Segment 1" {...a11yProps(0)} />
-                  <Tab label="Segment 2" {...a11yProps(1)} />
-                  <Tab label="Segment 3" {...a11yProps(2)} />
-                  <Tab label="Segment 4" {...a11yProps(3)} />
-                  <Tab label="Segment 5" {...a11yProps(4)} />
-                  <Tab label="Segment 6" {...a11yProps(5)} />
-                  <Tab label="Segment 7" {...a11yProps(6)} />
-                  <Tab label="Segment 8" {...a11yProps(7)} />
-                  <Tab label="Segment 9" {...a11yProps(8)} />
-                  <Tab label="Segment 10" {...a11yProps(9)} />
-                  <Tab label="Segment 11" {...a11yProps(10)} />
-                  <Tab label="Segment 12" {...a11yProps(11)} />
-                </Tabs>
-                <TabPanel value={value} index={0}>
-                  <Segment1TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={1}>
-                  <Segment2TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={2}>
-                  <Segment3TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={3}>
-                  <Segment4TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={4}>
-                  <Segment5TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={5}>
-                  <Segment6TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={6}>
-                  <Segment7TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={7}>
-                  <Segment8TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={8}>
-                  <Segment9TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={9}>
-                  <Segment10TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={10}>
-                  <Segment11TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
-                <TabPanel value={value} index={11}>
-                  <Segment12TGNIA handleClose={handleDialogClose} />
-                </TabPanel>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <InputLabel id="segment-select-label">
+                    Select Segment
+                  </InputLabel>
+                  <Select
+                    labelId="segment-select-label"
+                    id="segment-select"
+                    value={selectedSegment}
+                    label="Select Segment"
+                    onChange={handleSegmentChange}
+                  >
+                    <MenuItem value={1}>Segment 1 | Tenah Merah - BU1</MenuItem>
+                    <MenuItem value={2}>Segment 2 | BU1 - BU2</MenuItem>
+                    <MenuItem value={3}>Segment 3 | BU2 - BU3</MenuItem>
+                    <MenuItem value={4}>Segment 4 | BU3 - BU4</MenuItem>
+                    <MenuItem value={5}>Segment 5 | BU4 - BU5</MenuItem>
+                    <MenuItem value={6}>Segment 6 | BU5 - BU6</MenuItem>
+                    <MenuItem value={7}>
+                      Segment 7 | Malaysia Stub (Clump Weight - BU1)
+                    </MenuItem>
+                    <MenuItem value={8}>Segment 8 | Vung Tau - BU2</MenuItem>
+                    <MenuItem value={9}>
+                      Segment 9 | Deep Water Bay - BU3
+                    </MenuItem>
+                    <MenuItem value={10}>
+                      Segment 10 | Ballesteros - BU4
+                    </MenuItem>
+                    <MenuItem value={11}>
+                      Segment 11 | China Stub (Clump Weight - BU5)
+                    </MenuItem>
+                    <MenuItem value={12}>
+                      Segment 12 | TGN G2 Stub (BU7 - Clump Weight)
+                    </MenuItem>
+                  </Select>
+                </FormControl>
+
+                {/* Render the selected segment component */}
+                {renderSegmentComponent()}
               </Box>
             </CardContent>
           </Dialog>

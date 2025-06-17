@@ -203,10 +203,6 @@ const HongkongMarker = () => {
       />
       {/* Modal Dialog */}
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          <Typography variant="h5">Submarine Cables - Hong Kong</Typography>
-        </DialogTitle>
-        <Divider />
         <DialogContent sx={{ pb: 1 }}>
           <CardContent>
             <Box

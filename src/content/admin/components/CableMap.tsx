@@ -273,7 +273,7 @@ const CableMap = () => {
           </Typography>
           <Typography variant="h4" color="black">
             {ipopUtilization}
-            {parseFloat(ipopDifference) !== 0 && (
+            {/* {parseFloat(ipopDifference) !== 0 && (
               <Box
                 sx={(theme) => {
                   const diff = parseFloat(ipopDifference);
@@ -297,7 +297,7 @@ const CableMap = () => {
               >
                 {ipopDifference}
               </Box>
-            )}
+            )} */}
           </Typography>
         </Box>
         {/* Dynamic Hoverable Dot Markers*/}
