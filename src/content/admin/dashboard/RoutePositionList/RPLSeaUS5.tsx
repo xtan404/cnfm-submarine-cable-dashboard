@@ -98,6 +98,8 @@ function RPLSeaUS5() {
   const [positions, setPositions] = useState<[number, number][]>([]);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [defineCableOpen, setDefineCableOpen] = useState(false);
+  const [segmentData, setSegmentData] = useState<any[]>([]);
+  const [isHovered, setIsHovered] = useState(false);
 
   const [stats, setStats] = useState({
     data: [],
@@ -163,7 +165,8 @@ function RPLSeaUS5() {
         const result = await response.json();
 
         if (Array.isArray(result) && result.length > 0) {
-          // Log first few items to see structure
+          // Store the full segment data for hover popup
+          setSegmentData(result);
 
           // More flexible coordinate parsing
           const mappedPositions = result
@@ -242,21 +245,87 @@ function RPLSeaUS5() {
   const handleOpenDefine = () => setDefineCableOpen(true);
   const handleCloseDefine = () => setDefineCableOpen(false);
 
+  // Define polyline path options based on hover state
+  const getPathOptions = () => {
+    const baseColor = stats.avgUtilization > 0 ? 'green' : 'red';
+
+    if (isHovered) {
+      return {
+        color: baseColor,
+        weight: 6,
+        opacity: 1,
+        // CSS box-shadow equivalent for SVG paths - creates glow effect
+        className: 'glowing-polyline'
+      };
+    }
+
+    return {
+      color: baseColor,
+      weight: 4,
+      opacity: 0.8
+    };
+  };
+
+  // Add CSS for glowing effect
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      .glowing-polyline {
+        filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor);
+        transition: all 0.3s ease;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   return (
     <>
       <CableCutMarkers cableSegment="seaus5" />
-
-      {/* Enhanced Polyline with debugging */}
+      {/* Polyline Path with Hover Popup and Glowing Effect */}
       <Polyline
         positions={positions}
-        pathOptions={{
-          color: stats.avgUtilization > 0 ? 'green' : 'red',
-          weight: 4,
-          opacity: 0.8 // Add opacity to make it more visible
-        }}
+        pathOptions={getPathOptions()}
         eventHandlers={{
-          click: (e) => {
-            handleOpenDefine();
+          click: handleOpenDefine, // Open modal on click
+          mouseover: (e) => {
+            const layer = e.target;
+            const latlng = e.latlng;
+
+            // Set hover state to trigger glow effect
+            setIsHovered(true);
+
+            // Create hover popup that follows cursor
+            layer
+              .bindTooltip('SEA-US Segment 5', {
+                permanent: false,
+                direction: 'top',
+                offset: [0, -10],
+                className: 'custom-tooltip',
+                opacity: 0.9,
+                sticky: true // This makes the tooltip follow the cursor
+              })
+              .openTooltip(latlng);
+          },
+          mousemove: (e) => {
+            const layer = e.target;
+            const latlng = e.latlng;
+
+            // Update tooltip position to follow cursor
+            if (layer.getTooltip()) {
+              layer.getTooltip().setLatLng(latlng);
+            }
+          },
+          mouseout: (e) => {
+            const layer = e.target;
+
+            // Remove hover state to remove glow effect
+            setIsHovered(false);
+
+            layer.closeTooltip();
           }
         }}
       />

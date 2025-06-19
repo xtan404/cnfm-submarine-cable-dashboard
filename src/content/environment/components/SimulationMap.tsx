@@ -337,6 +337,7 @@ const SimulationMap = () => {
         <RPLSeaUS2 />
         <RPLSeaUS3 />
         <RPLSeaUS4 />
+        <RPLSeaUS5 />
         <RPLSeaUS6 />
         <RPLSJC1 />
         <RPLSJC3 />
