@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import Swal from 'sweetalert2';
 import Header from 'src/components/Header';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import CableMap from '../admin/components/CableMap';
 
 const legendItems = [
@@ -28,120 +28,56 @@ function SimulatorDashboard() {
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
 
-  const handleClearData = async () => {
-    const { isConfirmed } = await Swal.fire({
-      title: 'Are you absolutely sure?',
-      text: 'This action cannot be undone. This will permanently remove all the data, do you want to proceed?',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: 'gray',
-      confirmButtonText: 'Continue',
-      reverseButtons: true
-    });
-
-    if (!isConfirmed) return;
-
+  // ✅ Create a reusable fetch function
+  const fetchLastUpdate = useCallback(async () => {
     try {
-      const response = await fetch(`${apiBaseUrl}${port}/clear-utilization`, {
-        method: 'DELETE'
-      });
+      const response = await fetch(`${apiBaseUrl}${port}/latest-update`);
+      const data = await response.json();
 
-      const result = await response.json();
+      if (data?.update?.date_time) {
+        const fileName = data.update.file_name;
 
-      if (response.ok) {
-        await Swal.fire({
-          title: 'Old data removed!',
-          text: result.message || 'Data has been cleared.',
-          icon: 'success',
-          confirmButtonColor: '#3854A5'
-        });
+        // ✅ Remove .csv extension for display
+        const displayName = fileName
+          ? fileName.replace(/\.csv$/i, '')
+          : fileName;
 
-        // ✅ Only reload after confirming the success alert
-        window.location.reload();
+        setLastUpdate(displayName);
+        return true;
       } else {
-        // ❌ Throw only when not OK
-        throw new Error(result.message || 'Failed to clear data');
+        console.log('No update timestamp received');
+        return false;
       }
-    } catch (error) {
-      Swal.fire('Error!', error.message || 'Something went wrong', 'error');
-      console.error('Clear error:', error);
+    } catch (err) {
+      console.error('Error fetching latest update:', err);
+      return false;
     }
-  };
-  // Open phpMyAdmin in a new tab
-  //window.open(
-  //  `${apiBaseUrl}/phpmyadmin/index.php?route=/table/import&db=cnfm_dashboard&table=utilization`,
-  //  '_blank'
-  //);
-  const handleNewDataClick = () => {
-    fileInputRef.current?.click(); // Trigger the hidden file input
-  };
+  }, [apiBaseUrl, port]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Ensure it's an xlsx file
-    if (!file.name.endsWith('.csv')) {
-      Swal.fire('Invalid file type', 'Only .csv files are allowed', 'error');
-      return;
-    }
-
-    // ✅ Handle the file upload here
-    console.log('Selected CSV file:', file);
-
-    // Example: Create FormData and upload to API
-    const formData = new FormData();
-    formData.append('file', file);
-
-    fetch(`${apiBaseUrl}${port}/upload-csv`, {
-      method: 'POST',
-      body: formData
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        Swal.fire('Success', 'File uploaded successfully', 'success');
-        console.log(data);
-      })
-      .catch((err) => {
-        Swal.fire(
-          'Upload failed',
-          err.message || 'Something went wrong',
-          'error'
-        );
-        console.log(err);
-      });
-  };
-
+  // ✅ Add useEffect to actually call the fetch function
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    const fetchLastUpdate = async () => {
-      try {
-        const response = await fetch(`${apiBaseUrl}${port}/latest-update`);
-        const data = await response.json();
+    const initialFetch = async () => {
+      const success = await fetchLastUpdate();
 
-        if (data?.update?.date_time) {
-          const date = new Date(data.update.date_time);
-          setLastUpdate(date.toLocaleString());
-
-          // ✅ Stop interval after successful fetch
-          clearInterval(interval);
-        } else {
-          console.log('No update timestamp received, retrying...');
-        }
-      } catch (err) {
-        console.error('Error fetching latest update:', err);
+      if (!success) {
+        // Retry every 2s until we get the data
+        interval = setInterval(async () => {
+          const retrySuccess = await fetchLastUpdate();
+          if (retrySuccess) {
+            clearInterval(interval);
+          }
+        }, 2000);
       }
     };
 
-    // Run immediately on mount
-    fetchLastUpdate();
+    initialFetch();
 
-    // Retry every 2s until we get the timestamp
-    interval = setInterval(fetchLastUpdate, 2000);
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [apiBaseUrl, port]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [fetchLastUpdate]);
 
   return (
     <>
@@ -203,8 +139,7 @@ function SimulatorDashboard() {
                       <Box sx={{ flexGrow: 1 }} />
                       <Box>
                         <Typography variant="body2">
-                          Last Utilization Update:{' '}
-                          {lastUpdate || 'No Updates Found'}
+                          Source File: {lastUpdate || 'No Source Found'}
                         </Typography>
                       </Box>
                     </Box>

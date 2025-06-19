@@ -21,6 +21,9 @@ import {
 import Segment1SeaUS from './Segment1SeaUS';
 import Segment2SeaUS from './Segment2SeaUS';
 import Segment3SeaUS from './Segment3SeaUS';
+import Segment4SeaUS from './Segment4SeaUS';
+import Segment5SeaUS from './Segment5SeaUS';
+import Segment6SeaUS from './Segment6SeaUS';
 
 interface CutSeaUSProps {
   handleClose?: () => void;
@@ -88,6 +91,12 @@ const CutSeaUS: React.FC<CutSeaUSProps> = ({ handleClose }) => {
         return <Segment2SeaUS handleClose={handleDialogClose} />;
       case 3:
         return <Segment3SeaUS handleClose={handleDialogClose} />;
+      case 4:
+        return <Segment4SeaUS handleClose={handleDialogClose} />;
+      case 5:
+        return <Segment5SeaUS handleClose={handleDialogClose} />;
+      case 6:
+        return <Segment6SeaUS handleClose={handleDialogClose} />;
       default:
         return <Segment1SeaUS handleClose={handleDialogClose} />;
     }
@@ -136,9 +145,22 @@ const CutSeaUS: React.FC<CutSeaUSProps> = ({ handleClose }) => {
                     label="Select Segment"
                     onChange={handleSegmentChange}
                   >
-                    <MenuItem value={1}>Segment 1 | Kauditan - BU</MenuItem>
-                    <MenuItem value={2}>Segment 2 | Davao - BU</MenuItem>
-                    <MenuItem value={3}>Segment 3 | Piti - BU</MenuItem>
+                    <MenuItem value={1}>
+                      Segment 1 | Kauditan - BU Davao City
+                    </MenuItem>
+                    <MenuItem value={2}>
+                      Segment 2 | Davao - BU Davao City
+                    </MenuItem>
+                    <MenuItem value={3}>
+                      Segment 3 | Piti - BU Davao City
+                    </MenuItem>
+                    <MenuItem value={4}>Segment 4 | Piti - Hawaii BU</MenuItem>
+                    <MenuItem value={5}>
+                      Segment 5 | Hawaii - Hawaii BU
+                    </MenuItem>
+                    <MenuItem value={6}>
+                      Segment 6 | Hermosa, USA - Hawaii BU
+                    </MenuItem>
                   </Select>
                 </FormControl>
 

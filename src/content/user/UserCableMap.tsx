@@ -38,6 +38,9 @@ import RPLTGNIA12 from '../admin/dashboard/RoutePositionList/RPLTGNIA12';
 import SJC from '../admin/dashboard/SJC';
 import C2C from '../admin/dashboard/C2C';
 import TGNIA from '../admin/dashboard/TGNIA';
+import RPLSeaUS4 from '../admin/dashboard/RoutePositionList/RPLSeaUS4';
+import RPLSeaUS5 from '../admin/dashboard/RoutePositionList/RPLSeaUS5';
+import RPLSeaUS6 from '../admin/dashboard/RoutePositionList/RPLSeaUS6';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -261,7 +264,7 @@ const UserCableMap = () => {
           }}
         >
           <Typography variant="caption" color="gray">
-            Total Active Capacity:
+            Capacity:
           </Typography>
           <Typography variant="h4" color="black">
             {stats.totalGbps} Gbps
@@ -304,6 +307,9 @@ const UserCableMap = () => {
         <RPLSeaUS1 />
         <RPLSeaUS2 />
         <RPLSeaUS3 />
+        <RPLSeaUS4 />
+        <RPLSeaUS5 />
+        <RPLSeaUS6 />
         <RPLSJC1 />
         <RPLSJC3 />
         <RPLSJC4 />

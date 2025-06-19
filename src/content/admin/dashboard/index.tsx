@@ -14,7 +14,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile';
 import Swal from 'sweetalert2';
 import Header from 'src/components/Header';
 import CableMap from '../components/CableMap';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import SegmentUpdate from './SegmentUpdate';
 
 const legendItems = [
@@ -30,6 +30,32 @@ function AdminDashboard() {
   const port = process.env.REACT_APP_PORT;
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+
+  // ✅ Create a reusable fetch function
+  const fetchLastUpdate = useCallback(async () => {
+    try {
+      const response = await fetch(`${apiBaseUrl}${port}/latest-update`);
+      const data = await response.json();
+
+      if (data?.update?.date_time) {
+        const fileName = data.update.file_name;
+
+        // ✅ Remove .csv extension for display
+        const displayName = fileName
+          ? fileName.replace(/\.csv$/i, '')
+          : fileName;
+
+        setLastUpdate(displayName);
+        return true;
+      } else {
+        console.log('No update timestamp received');
+        return false;
+      }
+    } catch (err) {
+      console.error('Error fetching latest update:', err);
+      return false;
+    }
+  }, [apiBaseUrl, port]);
 
   const handleClearData = async () => {
     const { isConfirmed } = await Swal.fire({
@@ -61,8 +87,9 @@ function AdminDashboard() {
 
         // ✅ Only reload after confirming the success alert
         window.location.reload();
+        // ✅ Refetch the latest update after clearing
+        await fetchLastUpdate();
       } else {
-        // ❌ Throw only when not OK
         throw new Error(result.message || 'Failed to clear data');
       }
     } catch (error) {
@@ -70,81 +97,80 @@ function AdminDashboard() {
       console.error('Clear error:', error);
     }
   };
-  // Open phpMyAdmin in a new tab
-  //window.open(
-  //  `${apiBaseUrl}/phpmyadmin/index.php?route=/table/import&db=cnfm_dashboard&table=utilization`,
-  //  '_blank'
-  //);
+
   const handleNewDataClick = () => {
-    fileInputRef.current?.click(); // Trigger the hidden file input
+    fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Ensure it's an xlsx file
     if (!file.name.endsWith('.csv')) {
       Swal.fire('Invalid file type', 'Only .csv files are allowed', 'error');
       return;
     }
 
-    // ✅ Handle the file upload here
     console.log('Selected CSV file:', file);
 
-    // Example: Create FormData and upload to API
     const formData = new FormData();
     formData.append('file', file);
 
-    fetch(`${apiBaseUrl}${port}/upload-csv`, {
-      method: 'POST',
-      body: formData
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        Swal.fire('Success', 'File uploaded successfully', 'success');
-        console.log(data);
-      })
-      .catch((err) => {
-        Swal.fire(
-          'Upload failed',
-          err.message || 'Something went wrong',
-          'error'
-        );
-        console.log(err);
+    try {
+      const response = await fetch(`${apiBaseUrl}${port}/upload-csv`, {
+        method: 'POST',
+        body: formData
       });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        await Swal.fire('Success', 'File uploaded successfully', 'success');
+
+        // ✅ Refetch the latest update after successful upload
+        await fetchLastUpdate();
+      } else {
+        throw new Error(data.message || 'Upload failed');
+      }
+    } catch (err) {
+      Swal.fire(
+        'Upload failed',
+        err.message || 'Something went wrong',
+        'error'
+      );
+      console.error('Upload error:', err);
+    }
+
+    // Clear the file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
+  // ✅ Initial fetch with retry logic
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    const fetchLastUpdate = async () => {
-      try {
-        const response = await fetch(`${apiBaseUrl}${port}/latest-update`);
-        const data = await response.json();
+    const initialFetch = async () => {
+      const success = await fetchLastUpdate();
 
-        if (data?.update?.date_time) {
-          const date = new Date(data.update.date_time);
-          setLastUpdate(date.toLocaleString());
-
-          // ✅ Stop interval after successful fetch
-          clearInterval(interval);
-        } else {
-          console.log('No update timestamp received, retrying...');
-        }
-      } catch (err) {
-        console.error('Error fetching latest update:', err);
+      if (!success) {
+        // Retry every 2s until we get the data
+        interval = setInterval(async () => {
+          const retrySuccess = await fetchLastUpdate();
+          if (retrySuccess) {
+            clearInterval(interval);
+          }
+        }, 2000);
       }
     };
 
-    // Run immediately on mount
-    fetchLastUpdate();
+    initialFetch();
 
-    // Retry every 2s until we get the timestamp
-    interval = setInterval(fetchLastUpdate, 2000);
-
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, [apiBaseUrl, port]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [fetchLastUpdate]);
 
   return (
     <>
@@ -172,13 +198,12 @@ function AdminDashboard() {
                 <Grid item xs={12}>
                   <Box p={4}>
                     <Header />
-                    {/* Legend */}
                     <Box
                       sx={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 3, // Adds spacing between legend items
-                        flexWrap: 'wrap', // Ensures responsiveness
+                        gap: 3,
+                        flexWrap: 'wrap',
                         mb: 1
                       }}
                     >
@@ -206,11 +231,9 @@ function AdminDashboard() {
                       <Box sx={{ flexGrow: 1 }} />
                       <Box>
                         <Typography variant="body2">
-                          Last Utilization Update:{' '}
-                          {lastUpdate || 'No Updates Found'}
+                          Source File: {lastUpdate || 'No Source Found'}
                         </Typography>
                       </Box>
-                      {/* Clear Old Data Button */}
                       <Box
                         sx={{
                           display: 'flex',
@@ -229,7 +252,7 @@ function AdminDashboard() {
                             }
                           }}
                         >
-                          {' Clear Data'}
+                          Clear Data
                         </Button>
                         <Button
                           variant="contained"
@@ -240,7 +263,7 @@ function AdminDashboard() {
                             mx: 0.5
                           }}
                         >
-                          {' New Data'}
+                          New Data
                         </Button>
                         <input
                           type="file"
@@ -252,7 +275,6 @@ function AdminDashboard() {
                         <SegmentUpdate />
                       </Box>
                     </Box>
-                    {/* Map Container */}
                     <CableMap />
                   </Box>
                 </Grid>

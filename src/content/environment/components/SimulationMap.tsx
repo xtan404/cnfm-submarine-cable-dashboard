@@ -43,6 +43,9 @@ import RPLTGNIA10 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA10
 import RPLTGNIA11 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA11';
 import RPLTGNIA12 from 'src/content/admin/dashboard/RoutePositionList/RPLTGNIA12';
 import ResetButton from './ResetButton';
+import RPLSeaUS4 from 'src/content/admin/dashboard/RoutePositionList/RPLSeaUS4';
+import RPLSeaUS5 from 'src/content/admin/dashboard/RoutePositionList/RPLSeaUS5';
+import RPLSeaUS6 from 'src/content/admin/dashboard/RoutePositionList/RPLSeaUS6';
 
 function ChangeView({ center, zoom }) {
   const map = useMap();
@@ -266,7 +269,7 @@ const SimulationMap = () => {
           }}
         >
           <Typography variant="caption" color="gray">
-            Total Active Capacity:
+            Capacity:
           </Typography>
           <Typography variant="h4" color="black">
             {stats.totalGbps} Gbps
@@ -333,6 +336,8 @@ const SimulationMap = () => {
         <RPLSeaUS1 />
         <RPLSeaUS2 />
         <RPLSeaUS3 />
+        <RPLSeaUS4 />
+        <RPLSeaUS6 />
         <RPLSJC1 />
         <RPLSJC3 />
         <RPLSJC4 />

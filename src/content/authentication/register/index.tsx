@@ -70,8 +70,9 @@ const RegisterPage = () => {
       user_fname: Yup.string().required('First Name is required'),
       user_lname: Yup.string().required('Last Name is required'),
       user_email: Yup.string()
-        .email('Invalid email')
-        .required('Email is required'),
+        .min(8, 'Username must be at least 8 characters')
+        .max(16, 'Username must be less than 16 characters')
+        .required('Username is required'),
       user_password: Yup.string()
         .min(8, 'Password must be at least 8 characters long')
         .required('Password is required'),
@@ -253,8 +254,8 @@ const RegisterPage = () => {
                 fullWidth
                 id="user_email"
                 name="user_email"
-                label="Email"
-                autoComplete="email"
+                label="Username"
+                autoComplete="username"
                 sx={{
                   marginBottom:
                     formik.touched.user_email && formik.errors.user_email

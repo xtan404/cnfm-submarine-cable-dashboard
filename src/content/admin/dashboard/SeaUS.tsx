@@ -231,16 +231,7 @@ function SeaUS() {
   return (
     <>
       {/* Polyline Path */}
-      <Polyline
-        positions={positions}
-        pathOptions={{
-          color: stats.avgUtilization > 0 ? 'green' : 'red',
-          weight: 4
-        }}
-        eventHandlers={{
-          click: handleOpenDefine // Open modal on click
-        }}
-      />
+
       <DynamicMarker
         position={[15.0, 160.0]}
         label={`Total Capacity: <strong>${stats.totalGbps} Gbps</strong><br>Average Utilization: <strong>${stats.avgUtilization}%</strong>`}

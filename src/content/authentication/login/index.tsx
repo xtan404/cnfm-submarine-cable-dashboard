@@ -87,8 +87,8 @@ const LoginPage = () => {
     },
     validationSchema: Yup.object({
       user_email: Yup.string()
-        .email('Invalid Email.')
-        .required('Email is required'),
+        .min(8, 'Username must be at least 8 characters')
+        .required('Username is required'),
       user_password: Yup.string().required('Password is required')
     }),
     onSubmit: (values) => {
@@ -236,8 +236,8 @@ const LoginPage = () => {
                 fullWidth
                 id="user_email"
                 name="user_email"
-                label="Email"
-                autoComplete="user_email"
+                label="Username"
+                autoComplete="username"
                 sx={{
                   marginBottom:
                     formik.touched.user_email && formik.errors.user_email
@@ -266,7 +266,7 @@ const LoginPage = () => {
                   id="user_password"
                   name="user_password"
                   label="Password"
-                  autoComplete="new-password"
+                  autoComplete="current-password"
                   sx={{
                     marginBottom:
                       formik.touched.user_password &&
