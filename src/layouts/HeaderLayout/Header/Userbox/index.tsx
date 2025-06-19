@@ -71,6 +71,9 @@ function HeaderUserbox() {
   const [isOpen, setOpen] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  // Check if user is Administrator
+  const isAdministrator = role === 'Administrator';
+
   const handleOpen = (): void => {
     setOpen(true);
   };
@@ -86,7 +89,7 @@ function HeaderUserbox() {
   };
 
   const getUserName = () => {
-    if (!user.user_fname || !user.user_fname) {
+    if (!user.user_fname || !user.user_lname) {
       return 'Blank';
     }
     return `${user.user_fname} ${user.user_lname}`;
@@ -131,16 +134,23 @@ function HeaderUserbox() {
           </UserBoxText>
         </MenuUserBox>
         <Divider sx={{ mb: 0 }} />
-        <List sx={{ p: 1 }} component="nav">
-          <ListItem button to="/change-password" component={NavLink}>
-            <PasswordIcon fontSize="small" />
-            <ListItemText primary="Change Password" />
-          </ListItem>
-          {/* <ListItem button to="/manage-accounts" component={NavLink}>
-            <ManageAccountsIcon fontSize="small" />
-            <ListItemText primary="Manage Accounts" />
-          </ListItem>*/}
-        </List>
+        {/* Only show Change Password option for Administrators */}
+        {isAdministrator && (
+          <List sx={{ p: 1 }} component="nav">
+            <ListItem button to="/change-password" component={NavLink}>
+              <PasswordIcon fontSize="small" />
+              <ListItemText primary="Change Password" />
+            </ListItem>
+
+            {/* Uncomment if you want to add Manage Accounts for Administrators only */}
+            {/* {isAdministrator && (
+            <ListItem button to="/manage-accounts" component={NavLink}>
+              <ManageAccountsIcon fontSize="small" />
+              <ListItemText primary="Manage Accounts" />
+            </ListItem>
+          )} */}
+          </List>
+        )}
         <Divider />
         <Box sx={{ m: 1 }}>
           <Button color="primary" fullWidth onClick={handleSignOut}>
