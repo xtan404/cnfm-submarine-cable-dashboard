@@ -28,12 +28,35 @@ type MarkerData = {
   label: string;
 };
 
+// Add this function before your DynamicMarker component to create inverted triangle icon
+const createTriangleIcon = (color: string = '#ffeb3b', size: number = 20) => {
+  const triangleSvg = `
+    <svg width="${size}" height="${size}" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="12,22 2,4 22,4" 
+               fill="${color}" 
+               stroke="#000000" 
+               stroke-width="2"/>
+    </svg>
+  `;
+
+  return L.divIcon({
+    html: triangleSvg,
+    className: 'triangle-marker',
+    iconSize: [size, size],
+    // For an inverted triangle, the geometric center is roughly at 2/3 from the top
+    iconAnchor: [size / 2, (size * 2) / 4.5], // Center the triangle properly
+    popupAnchor: [0, -8] // Adjust popup position accordingly
+  });
+};
+
+// Modified DynamicMarker component
 function DynamicMarker({
   position,
   label,
   icon,
-  minZoom = 5
-}: DynamicMarkerProps) {
+  minZoom = 5,
+  useTriangle = false // Add new prop to control triangle usage
+}: DynamicMarkerProps & { useTriangle?: boolean }) {
   const map = useMap();
   const [currentZoom, setCurrentZoom] = useState<number>(map.getZoom());
 
@@ -58,7 +81,14 @@ function DynamicMarker({
 
       let marker: L.Marker | L.CircleMarker;
 
-      if (icon) {
+      if (useTriangle) {
+        // Use triangle icon for BU markers
+        const triangleIcon = createTriangleIcon('#ffff00', 16);
+        marker = L.marker(position, {
+          icon: triangleIcon,
+          pane: 'markerPane'
+        });
+      } else if (icon) {
         marker = L.marker(position, {
           icon,
           pane: 'markerPane'
@@ -77,7 +107,7 @@ function DynamicMarker({
         `<span style="font-size: 14px; font-weight: bold;">${label}</span>`,
         {
           direction: 'top',
-          offset: icon ? [0, -30] : [0, -10],
+          offset: useTriangle ? [0, -8] : icon ? [0, -30] : [0, -10],
           permanent: false,
           opacity: 1
         }
@@ -89,7 +119,7 @@ function DynamicMarker({
         map.removeLayer(marker);
       };
     }
-  }, [position, map, label, icon, currentZoom, minZoom]);
+  }, [position, map, label, icon, currentZoom, minZoom, useTriangle]);
 
   return null;
 }
@@ -297,6 +327,18 @@ function RPLTGNIA9() {
         filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor);
         transition: all 0.3s ease;
       }
+      .triangle-marker {
+        background: transparent !important;
+        border: none !important;
+      }
+      /* Comprehensive focus removal for leaflet elements */
+      .leaflet-interactive:focus,
+      .leaflet-interactive:focus-visible,
+      .leaflet-zoom-animated path:focus,
+      .leaflet-zoom-animated path:focus-visible {
+        outline: none !important;
+        box-shadow: none !important;
+      }
     `;
     document.head.appendChild(style);
 
@@ -353,15 +395,46 @@ function RPLTGNIA9() {
         }}
       />
 
-      {/* Dynamic Markers from API with minimum zoom of 5 */}
-      {markers.map((marker, index) => (
-        <DynamicMarker
-          key={`marker-${index}`}
-          position={[marker.latitude, marker.longitude] as [number, number]}
-          label={marker.label}
-          minZoom={8} // Set minimum zoom level to 5
-        />
-      ))}
+      {/* Dynamic Markers from API with minimum zoom of 8 */}
+      {markers.map((marker, index) => {
+        // Check if this marker should use triangle (BU markers)
+        const isBUMarker = marker.label && marker.label.includes('BU');
+
+        return (
+          <DynamicMarker
+            key={`marker-${index}`}
+            position={[marker.latitude, marker.longitude] as [number, number]}
+            label={marker.label}
+            minZoom={8}
+            useTriangle={isBUMarker} // Use triangle for BU markers
+          />
+        );
+      })}
+
+      {/* Regular markers (BMH) */}
+      {markers
+        .filter((marker) => marker.label && marker.label.includes('BMH'))
+        .map((marker, index) => (
+          <DynamicMarker
+            key={`bmh-marker-${index}`}
+            position={[marker.latitude, marker.longitude] as [number, number]}
+            label={marker.label}
+            minZoom={8}
+          />
+        ))}
+      {/* Triangle markers (BU) */}
+      {markers
+        .filter((marker) => marker.label && marker.label.includes('BU'))
+        .map((marker, index) => (
+          <DynamicMarker
+            key={`bu-marker-${index}`}
+            position={[marker.latitude, marker.longitude] as [number, number]}
+            label={marker.label}
+            minZoom={8}
+            useTriangle={true}
+          />
+        ))}
+
       {/* Define Cable Modal Dialog */}
       <Dialog
         open={defineCableOpen}
