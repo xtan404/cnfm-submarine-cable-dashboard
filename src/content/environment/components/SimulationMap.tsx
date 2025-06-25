@@ -107,6 +107,7 @@ function DynamicMarker({ position, label, icon }: DynamicMarkerProps) {
 
 const SimulationMap = () => {
   const [mapHeight, setMapHeight] = useState('600px');
+  const [ipopTotal, setIpopTotal] = useState('0');
   const [ipopUtilization, setIpopUtilization] = useState('0%');
   const [ipopDifference, setIpopDifference] = useState('0%');
   const [stats, setStats] = useState({
@@ -201,20 +202,14 @@ const SimulationMap = () => {
         const data = await response.json();
 
         if (data?.current?.length) {
+          const currentTotal = parseFloat(data.current[0].cable);
           const currentVal = parseFloat(data.current[0].a_side);
+          setIpopTotal(`${currentTotal}`);
           setIpopUtilization(`${currentVal}%`);
-
-          if (data?.previous?.length) {
-            const previousVal = parseFloat(data.previous[0].a_side);
-            const diff = currentVal - previousVal;
-            const sign = diff > 0 ? '+' : '';
-            setIpopDifference(`${sign}${diff.toFixed(2)}%`);
-          } else {
-            setIpopDifference('');
-          }
 
           clearInterval(interval);
         } else {
+          setIpopTotal('0');
           setIpopUtilization('0%');
           setIpopDifference('');
         }
@@ -272,7 +267,7 @@ const SimulationMap = () => {
             Capacity:
           </Typography>
           <Typography variant="h4" color="black">
-            {stats.totalGbps} Gbps
+            {ipopTotal} Gbps
           </Typography>
 
           <Typography variant="caption" color="gray">

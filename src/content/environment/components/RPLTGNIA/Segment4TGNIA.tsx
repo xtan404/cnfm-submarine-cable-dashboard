@@ -789,13 +789,6 @@ const Segment4TGNIA: React.FC<Segment4TGNIAProps> = ({
                   )}
                 </FormControl>
               </Box>
-
-              <Box sx={{ mt: 0 }}>
-                <Typography variant="body2" color="text.secondary">
-                  {getCutTypeDescription(values.cutType)}
-                </Typography>
-              </Box>
-
               <DialogActions>
                 <Button
                   onClick={() => externalHandleClose && externalHandleClose()}

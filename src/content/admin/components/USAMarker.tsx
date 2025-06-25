@@ -274,41 +274,6 @@ const USAMarker = () => {
                   </Typography>
                 </Box>
               </Box>
-
-              {/* Data Comparison Section */}
-              <Box mt={2} sx={{ textAlign: 'center' }}>
-                <Typography
-                  variant="body1"
-                  color={
-                    averageDifference < 0
-                      ? 'error.main'
-                      : averageDifference > 0
-                      ? 'success.main'
-                      : 'text.primary'
-                  }
-                  fontWeight="bold"
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  gap={0.5}
-                >
-                  {averageDifference < 0 ? (
-                    <ArrowDownward fontSize="small" />
-                  ) : averageDifference > 0 ? (
-                    <ArrowUpward fontSize="small" />
-                  ) : (
-                    <HorizontalRule fontSize="small" /> // or any neutral icon
-                  )}
-                  {averageDifference === 0
-                    ? 'No change in utilization'
-                    : `${Math.abs(
-                        averageDifference
-                      )}% in utilization compared to last data`}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Based on the average utilization of SEA-US cable
-                </Typography>
-              </Box>
             </Box>
           </CardContent>
         </DialogContent>

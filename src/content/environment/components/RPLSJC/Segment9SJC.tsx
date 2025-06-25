@@ -789,13 +789,6 @@ const Segment9SJC: React.FC<Segment9SJCProps> = ({
                   )}
                 </FormControl>
               </Box>
-
-              <Box sx={{ mt: 0 }}>
-                <Typography variant="body2" color="text.secondary">
-                  {getCutTypeDescription(values.cutType)}
-                </Typography>
-              </Box>
-
               <DialogActions>
                 <Button
                   onClick={() => externalHandleClose && externalHandleClose()}
